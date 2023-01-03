@@ -1,0 +1,30 @@
+{
+  "name": "aces-api",
+  "private": true,
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "jest --verbose",
+    "dev": "wrangler dev src/index.ts",
+    "local": "wrangler dev src/index.ts --local --persist",
+    "deploy": "wrangler publish src/index.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bson-objectid": "^2.0.4",
+    "hono": "^2.6.2",
+    "iron-session": "^6.3.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20221111.1",
+    "@databases/split-sql-query": "^1.0.3",
+    "@databases/sql": "^3.2.0",
+    "@types/jest": "^29.2.3",
+    "better-sqlite3": "^8.0.1",
+    "esbuild": "^0.15.15",
+    "esbuild-jest": "^0.5.0",
+    "jest": "^29.3.1",
+    "jest-environment-miniflare": "^2.11.0",
+    "wrangler": "^2.6.2"
+  }
+}

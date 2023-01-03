@@ -1,0 +1,15 @@
+dist
+node_modules
+worker
+package-lock.json
+yarn.lock
+.wrangler
+.cargo-ok
+.DS_Store
+
+# dev
+logs
+notes
+
+# Output of 'npm pack'
+*.tgz
