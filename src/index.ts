@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { serveStatic } from 'hono/serve-static.module'
 import { Env } from './env'
 import { logPath, objectify } from './utils'
 import signinHTML from './signin-html'
@@ -30,12 +31,17 @@ const app = new Hono<{ Bindings: Env }>({ strict: true })
 // from DurableObject
 // TODO: Should create issue on honojs
 
+app.use('/static/*', serveStatic({ root: './' }))
+app.use('/favicon.ico', serveStatic({ path: './favicon.ico' }))
+app.use('/login', serveStatic({ path: './login.html' }))
+app.get('/', (c) => c.text('This is Home! You can access: /static/hello.txt'))
+
 app.use('*', async (c, next) => {
   logPath(c, 'Hono')
   await next()
 })
 
-app.get('/', async (c) => {
+app.get('/xxxxx', async (c) => {
   if (globalThis.MINIFLARE) {
     console.log('Running in local/dev mode')
   } else {
