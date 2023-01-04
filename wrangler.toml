@@ -19,11 +19,22 @@ database_id = "f13e4747-0c58-4f1e-8a8e-2eda1bb5118c"
 preview_database_id = "f13e4747-0c58-4f1e-8a8e-2eda1bb5118c"
 
 [durable_objects]
-bindings = [
-    {name = "ACES_DURABLE", class_name = "AcesDurable"},
-    {name = "TENANT_DURABLE", class_name = "TenantDurable"},
+bindings = [ # TenantsDurable
+    # {name = "ACES_DURABLE", class_name = "AcesDurable"},
+    # {name = "TENANT_DURABLE", class_name = "TenantDurable"},
+    # {name = "TENANTS_DURABLE", class_name = "TenantsDurable"},
+    {name = "ACES_DO", class_name = "AcesDurables"},
 ]
 
 [[migrations]]
 tag = "v1" # Should be unique for each entry
 new_classes = ["AcesDurable", "TenantDurable"]
+
+[[migrations]]
+tag = "v2" # Should be unique for each entry
+new_classes = ["TenantsDurable"]
+
+[[migrations]]
+tag = "v3" # Should be unique for each entry
+new_classes = ["AcesDurables"]
+deleted_classes = ["AcesDurable", "TenantDurable", "TenantsDurable"]

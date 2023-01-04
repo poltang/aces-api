@@ -1,5 +1,5 @@
-export const ACES_BASE_PATH = '/aces'
-export const TENANT_BASE_PATH = '/tenant'
+export const LOGIN_TYPE_ACES = 'aces'
+export const LOGIN_TYPE_TENANT = 'tenant'
 
 export interface Env {
   COOKIE_NAME: string;
@@ -7,20 +7,5 @@ export interface Env {
   CORS_ORIGIN: string;
   DB: D1Database;
   KV: KVNamespace;
-  ACES_DURABLE: DurableObjectNamespace;
-  TENANT_DURABLE: DurableObjectNamespace;
+  ACES_DO: DurableObjectNamespace;
 }
-
-export const TABLES = [
-  'accounts',
-  'active_accounts',
-  'clients',
-  'members',
-  'module_groups',
-  'modules',
-  'project_modules',
-  'projects',
-  'tenants',
-  'used_modules',
-  'users',
-]

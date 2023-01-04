@@ -8,7 +8,9 @@ yarn.lock
 .cargo-ok
 .DS_Store
 wrangler.toml
+
 # dev
+*.log
 logs
 notes
 

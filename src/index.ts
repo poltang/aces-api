@@ -1,15 +1,27 @@
 import { Hono } from 'hono'
-import { ACES_BASE_PATH, Env, TABLES, TENANT_BASE_PATH } from './env'
+import { Env } from './env'
 import { logPath, objectify } from './utils'
 import signinHTML from './signin-html'
 import { authHandler } from './auth'
 import { getSessionUser } from './session'
 import { Credential } from './types'
 /* exports */
-export { AcesDurable } from './AcesDurable'
-export { TenantDurable } from './TenantDurable'
+export { AcesDurables } from './AcesDurables'
 
-const ACES_DURABLE_NAME = 'aces-durable'
+const ACES_DO_NAME = 'aces-durables'
+const TABLES = [
+  'accounts',
+  'active_accounts',
+  'clients',
+  'members',
+  'module_groups',
+  'modules',
+  'project_modules',
+  'projects',
+  'tenants',
+  'used_modules',
+  'users',
+]
 
 const app = new Hono<{ Bindings: Env }>({ strict: true })
 
@@ -52,8 +64,6 @@ app.get('/', async (c) => {
     }
   }
 
-  const t = await c.env.KV.getWithMetadata('cred:6397c47ba009344a26c0db8e')
-  console.log('KV', t)
   return c.text('Hello Hono!')
 })
 
@@ -70,10 +80,15 @@ app.post('/signin', async (c) => {
   const { type } = await c.req.json() as unknown as Credential
 
   if (!type) return c.text('Bad Request', 400)
-  if (type == 'tenant') return authHandler(c)
 
-  const id =  c.env.ACES_DURABLE.idFromName(ACES_DURABLE_NAME)
-  const stub = c.env.ACES_DURABLE.get(id)
+  // Tenant signin handler
+  if (type == 'tenant') {
+    return authHandler(c)
+  }
+
+  // Aces signin handler
+  const id =  c.env.ACES_DO.idFromName(ACES_DO_NAME)
+  const stub = c.env.ACES_DO.get(id)
   return await stub.fetch(req)
 })
 
@@ -122,45 +137,17 @@ app.get('/whoami', async (c) => {
   return c.json(user)
 })
 
-app.get('/modules', async (c) => {
+/* TenantDurable ALL TenantOrgs */
+
+app.get('/api/*', async (c) => {
   const user:any = await getSessionUser(c.req, c.env)
   if (!user) {
     return c.text('Unauthorized', 401)
   }
-  const id =  c.env.ACES_DURABLE.idFromName(ACES_DURABLE_NAME)
-  const stub = c.env.ACES_DURABLE.get(id)
+
+  const id =  c.env.ACES_DO.idFromName(ACES_DO_NAME)
+  const stub = c.env.ACES_DO.get(id)
   return await stub.fetch(c.req)
-})
-
-/* AcesDurable */
-
-app.get(`${ACES_BASE_PATH}/*`, async (c) => {
-  const user:any = await getSessionUser(c.req, c.env)
-
-  // Only for aces
-  if (user && user.loginType == 'aces') {
-    const id =  c.env.ACES_DURABLE.idFromName(ACES_DURABLE_NAME)
-    const stub = c.env.ACES_DURABLE.get(id)
-    return await stub.fetch(c.req)
-  }
-
-  return c.text('Unauthorized', 401)
-})
-
-/* TenantDurable */
-
-app.get(`${TENANT_BASE_PATH}/*`, async (c) => {
-  const user:any = await getSessionUser(c.req, c.env)
-  const tenantId = user?.tenantId
-
-  // Only for tenant
-  if (user && tenantId) {
-    const id =  c.env.TENANT_DURABLE.idFromName(tenantId)
-    const stub = c.env.TENANT_DURABLE.get(id)
-    return await stub.fetch(c.req)
-  }
-
-  return c.text('Unauthorized', 401)
 })
 
 export default app

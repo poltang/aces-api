@@ -11,8 +11,3 @@ export interface CredentialKV {
     secret: string;
   };
 }
-
-export interface BaseSessionUser {
-  username: string;
-
-}
