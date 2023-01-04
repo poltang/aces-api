@@ -55,8 +55,8 @@ export class TenantDurable {
   }
 
   async fetch(request: Request) {
-    let ip = request.headers.get("CF-Connecting-IP");
-    console.log(ip)
+    // let ip = request.headers.get("CF-Connecting-IP");
+    console.log('DurableObject: fetch()')
     return this.app.fetch(request)
   }
 
@@ -83,10 +83,14 @@ export class TenantDurable {
       console.log('blockConcurrencyWhile()')
     })
 
+    this.app.use('*', async (c, next) => {
+      logPath(c, 'TenantDurable')
+      await next()
+    })
+
     /* GET handlers */
 
     this.app.get(`${BASE_PATH}`, async (c) => {
-      logPath(c, 'TenantDurable')
       const user: any  = await getSessionUser(c.req, env)
       const tenantId = user.tenantId
 
@@ -97,14 +101,12 @@ export class TenantDurable {
     })
 
     this.app.get(`${BASE_PATH}/:kind`, async (c) => {
-      logPath(c, 'TenantDurable')
       const kind = c.req.param('kind')
       if (!Object.keys(prefixes).includes(kind)) {
         return c.text('404 Page Not Found', 404)
       }
       const user: any  = await getSessionUser(c.req, env)
       const tenantId = user.tenantId
-      console.log('tenantId:', tenantId)
 
       /* CHECK */ await this.initData(env, tenantId, kind)
 
@@ -115,23 +117,27 @@ export class TenantDurable {
     })
 
     this.app.get(`${BASE_PATH}/:kind/:id`, async (c) => {
-      logPath(c, 'TenantDurable')
       const id = c.req.param('id')
       const kind = c.req.param('kind')
       if (!Object.keys(prefixes).includes(kind)) {
         return c.text('404 Page Not Found', 404)
       }
 
-      const { tenantId }  = await getSessionUser(c.req, env) as unknown as any
+      // const { tenantId }  = await getSessionUser(c.req, env) as unknown as any
+      const user: any  = await getSessionUser(c.req, env)
+      const tenantId = user.tenantId
 
       /* CHECK */ await this.initData(env, tenantId, kind)
 
       const key = prefixes[kind] + id
+
       const item = await this.storage.get(key)
+
       if (!item) {
         return c.json({message: 'Not Found'}, 404)
       }
-      return c.json(objectify(item))
+      // return c.json(objectify(item))
+      return c.json(item)
     })
 
     /*

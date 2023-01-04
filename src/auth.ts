@@ -11,6 +11,7 @@ export async function authHandler(c) {
   if (!found) {
     return c.json({ message: 'Not Found'}, 404)
   }
+  console.log('RS', found)
 
   // 2. Check tenant's expiryDate
   // const exp = new Date(found.expiryDate).getTime()
@@ -31,10 +32,11 @@ export async function authHandler(c) {
     }
   */
   const key = `cred:${found.id}`
-  const secret = await c.env.KV.get(key) //as unknown as CredentialKV
-  console.log('secret', secret);
+  console.log('key', key);
+  const data = await c.env.KV.getWithMetadata(key) //as unknown as CredentialKV
+  console.log('data', data);
 
-  if (!secret) {
+  if (!data) {
     // Credential hasn't been created
     // TODO: what action?
     return c.json({ message: 'Could not log you in: Password not created'}, 401)
@@ -42,7 +44,7 @@ export async function authHandler(c) {
 
   // const secret = cred.metadata.secret
   // const decoded = await decrypt(secret)
-  if (password != await decrypt(secret)) {
+  if (password != await decrypt(data.metadata.secret)) {
     return c.json({ message: 'Error username or password'}, 401)
   }
 

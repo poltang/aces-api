@@ -1,9 +1,7 @@
 import { Hono } from 'hono'
-import { poweredBy } from 'hono/powered-by'
 import { ACES_BASE_PATH, Env, TABLES, TENANT_BASE_PATH } from './env'
-import { objectify } from './utils'
+import { logPath, objectify } from './utils'
 import signinHTML from './signin-html'
-import { encrypt } from './crypto'
 import { authHandler } from './auth'
 import { getSessionUser } from './session'
 import { Credential } from './types'
@@ -20,8 +18,14 @@ const app = new Hono<{ Bindings: Env }>({ strict: true })
 // from DurableObject
 // TODO: Should create issue on honojs
 
+app.use('*', async (c, next) => {
+  logPath(c, 'Hono')
+  await next()
+})
+
 app.get('/', async (c) => {
   const list = await c.env.KV.list({ prefix: 'cred:' })
+  console.log("list", list.keys.length)
   if (list.keys.length == 0) {
     const secret = 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg='
     const ids = [
@@ -56,16 +60,16 @@ app.get('/signin', async (c) => {
 
 // Signin only accepts Credential type object
 app.post('/signin', async (c) => {
+  // Cannot reconstruct a Request with a used body.
+  const req = c.req.clone()
   const { type } = await c.req.json() as unknown as Credential
-  if (!type) {
-    return c.text('Bad Request', 400)
-  }
-  if (type == 'aces') {
-    const id =  c.env.ACES_DURABLE.idFromName(ACES_DURABLE_NAME)
-    const stub = c.env.ACES_DURABLE.get(id)
-    return await stub.fetch(c.req)
-  }
-  return authHandler(c)
+
+  if (!type) return c.text('Bad Request', 400)
+  if (type == 'tenant') return authHandler(c)
+
+  const id =  c.env.ACES_DURABLE.idFromName(ACES_DURABLE_NAME)
+  const stub = c.env.ACES_DURABLE.get(id)
+  return await stub.fetch(req)
 })
 
 /* DB Viewers */

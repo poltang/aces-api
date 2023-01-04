@@ -1,23 +1,9 @@
 import { Hono } from "hono";
 import { ACES_BASE_PATH, Env } from "./env";
 import { D1Database } from './d1_beta'
-import { decrypt, encrypt } from "./crypto";
+import { decrypt } from "./crypto";
 import { sealData } from "iron-session/edge";
 import { logPath } from "./utils";
-
-const TABLES = [
-  // 'active_accounts',
-  // 'members',
-  // 'project_modules',
-  // 'users',
-  'accounts',
-  'clients',
-  'module_groups',
-  'modules',
-  'projects',
-  'tenants',
-  'used_modules',
-]
 
 const BASE_PATH = ACES_BASE_PATH
 const ADMIN_PREFIX = 'admin:'
@@ -32,7 +18,7 @@ export class AcesDurable {
 
   async fetch(request: Request) {
     let ip = request.headers.get("CF-Connecting-IP");
-    console.log(ip)
+    console.log('DurableObject: fetch()')
     return this.app.fetch(request)
   }
 
@@ -92,6 +78,11 @@ export class AcesDurable {
       }
     })
 
+    this.app.use('*', async (c, next) => {
+      logPath(c, 'AcesDurable')
+      await next()
+    })
+
     // Admin signin handler
     this.app.post('/signin', async (c) => {
       const {username, password} = await c.req.json() as unknown as any
@@ -100,11 +91,14 @@ export class AcesDurable {
       const sql = `SELECT * FROM admins WHERE status='active' AND (email=? OR username=?)`
       const found = await env.DB.prepare(sql).bind(username, username).first() as unknown as any
       if (!found) {
+        console.log('NOT FOUND IN DB')
         return c.json({ message: 'Not Found'}, 404)
       }
+      console.log('found', found)
 
       // 2. Check storage
       const data: any = await this.storage.get(`${ADMIN_PREFIX}${found.id}`)
+      console.log('data', data)
       const secret = data.secret
       if (password != await decrypt(secret)) {
         return c.json({ message: 'Error username or password'}, 401)
@@ -139,7 +133,6 @@ export class AcesDurable {
 
     // Shared
     this.app.get('/modules', async (c) => {
-      logPath(c, 'AcesDurable')
       const groups = await this.storage.list({ prefix: MODULE_GROUP_PREFIX })
       const modules = await this.storage.list({ prefix: MODULE_PREFIX })
       return c.json({
@@ -156,7 +149,6 @@ export class AcesDurable {
     })
 
     this.app.get(`${BASE_PATH}/:what`, async (c) => {
-      logPath(c, 'AcesDurable')
       const url = new URL(c.req.url)
       const group = url.searchParams.get('group')
       const method = url.searchParams.get('method')
@@ -180,7 +172,6 @@ export class AcesDurable {
     })
 
     this.app.get(`${BASE_PATH}/:what/:id`, async (c) => {
-      logPath(c, 'AcesDurable')
       const id = c.req.param('id')
       const what = c.req.param('what')
       if (!MODULE_PATHS.includes(what)) {
