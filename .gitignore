@@ -3,10 +3,11 @@ node_modules
 worker
 package-lock.json
 yarn.lock
+.vscode
 .wrangler
 .cargo-ok
 .DS_Store
-
+wrangler.toml
 # dev
 logs
 notes
