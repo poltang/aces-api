@@ -4,7 +4,8 @@ import { sealData } from "iron-session/edge";
 import { Env, LOGIN_TYPE_ACES, LOGIN_TYPE_TENANT } from "./env";
 import { D1Database } from './d1_beta'
 import { getSessionUser } from "./session";
-import { logPath, objectify } from "./utils";
+import { buildUpdater, logPath, objectify, prepareDBUpdate } from "./utils";
+import { TenantSessionUser, UpdateBody } from "./types";
 
 const KEYS = `KEYS`
 const ADMIN_PREFIX        = 'admin:'
@@ -57,7 +58,7 @@ export class AcesDurables {
   keys: string[] = []
 
   /*
-  // put(entries, options):
+  // DurableObject.put(entries, options):
   Takes an Object and stores each of its keys and values to storage.
   */
 
@@ -87,6 +88,15 @@ export class AcesDurables {
       const uniques = remove_duplicates_es6(newKeys)
       await this.storage.put(KEYS, uniques)
     }
+  }
+
+  updateItem = (env: Env, table: string, id: string, key: string, item: any, data: any) => {
+    const { dbUpdater, updatedObject } = buildUpdater(item, data)
+    const { stmt, bind } = prepareDBUpdate(table, id, dbUpdater)
+    // No await to update DO and D1
+    this.storage.put(key, updatedObject, { noCache: true })
+    env.DB.prepare(stmt).bind(...bind).run()
+    return updatedObject
   }
 
   async fetch(request: Request) {
@@ -208,6 +218,21 @@ export class AcesDurables {
       return c.json({ user, cookie: sealedData })
     })
 
+    /* ==== KEYS ================== */
+
+    this.app.get('/api/keys', async (c) => {
+      const keys: string[] = await this.storage.get(KEYS)
+      const url = new URL(c.req.url)
+      const withTid = url.searchParams.get('withTid')
+      const filtered = Boolean(parseInt(withTid))
+        ? keys.filter(k => k.split(':').length == 3)
+        : keys
+      filtered.sort()
+
+      const lines = filtered.join("\n  ")
+      return c.text(`  ${lines}`)
+    })
+
     /*
     Shared GET handlers
     ===================
@@ -251,6 +276,13 @@ export class AcesDurables {
     /api/tenant/accounts
     /api/tenant/members
     */
+
+    /* === TENANT GET HANDLERS ============ */
+    /*     /api/tenant/info --------------- */
+    /*     /api/tenant/clients  ----------- */
+    /*     /api/tenant/projects ----------- */
+    /*     /api/tenant/accounts ----------- */
+    /*     /api/tenant/members  ----------- */
 
     this.app.get('/api/tenant/:what', async (c) => {
       const paths = [...TENANT_PATHS, 'info']
@@ -303,16 +335,69 @@ export class AcesDurables {
       return c.json(item)
     })
 
+    /* === TENANT POST HANDLERS ============ */
+
+    this.app.post('/api/tenant/:what', async (c) => {
+      const paths = [...TENANT_PATHS, 'info']
+      const what = c.req.param('what')
+      console.log('what', what)
+      if (!paths.includes(what)) {
+        return c.text('404 Not Found', 404)
+      }
+
+      const user: any = await getSessionUser(c.req, env) // as unknown as TenantSessionUser
+      if (user.loginType != LOGIN_TYPE_TENANT) {
+        return c.text('Unauthorized', 401)
+      }
+
+      const table = what == 'info' ? 'tenants' : what
+      const { id, data } = await c.req.json() as unknown as UpdateBody
+
+      // If table is 'tenants', the `id` must match `user.tenantId`
+      if (table == 'tenants') {
+        if (id != user.tenantId) {
+          return c.json({
+            info: "The `id` doesn't match `tenantId`"
+          }, 400)
+        }
+
+        const key = `${TENANT_PREFIX}${id}`
+        const item = await this.storage.get(key)
+        if (!item) {
+          return c.json({
+            info: "Could not find the item to be updated",
+          }, 400)
+        }
+
+        const updatedObject = this.updateItem(env, table, id, key, item, data)
+        return c.json(updatedObject)
+      }
+
+      // Table = accounts / client / member / project
+      // Key = [type]:[tenantId]:[id]
+      const key = `${prefixes[table]}${user.tenantId}:${id}`
+      const item = await this.storage.get(key)
+      if (!item) {
+        return c.json({
+          info: "Could not find the item to be updated",
+        }, 400)
+      }
+
+      const updatedObject = this.updateItem(env, table, id, key, item, data)
+      return c.json(updatedObject)
+    })
+
+
     /*
     Aces GET handlers
-    ===================
-    /api/accounts?tid=xxx
-    /api/projects?tid=xxx
-    /api/clients?tid=xxx
-    /api/members?tid=xxx
-    /api/tenants?tid=xxx
-    /api/users?tid=xxx
-    */
+    ================= */
+    // /api/accounts?tid=xxx
+    // /api/projects?tid=xxx
+    // /api/clients?tid=xxx
+    // /api/members?tid=xxx
+    // /api/tenants?tid=xxx
+    // /api/users?tid=xxx
+    //
 
     this.app.get('/api/:subject', async (c) => {
       const subject = c.req.param('subject')

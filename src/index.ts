@@ -127,8 +127,6 @@ app.get('/data/:table/:id', async (c) => {
   return c.json(objectify(rs))
 })
 
-/* Shared */
-
 app.get('/whoami', async (c) => {
   const user:any = await getSessionUser(c.req, c.env)
   if (!user) {
@@ -137,9 +135,20 @@ app.get('/whoami', async (c) => {
   return c.json(user)
 })
 
-/* TenantDurable ALL TenantOrgs */
+/* AcesDurables */
 
 app.get('/api/*', async (c) => {
+  const user:any = await getSessionUser(c.req, c.env)
+  if (!user) {
+    return c.text('Unauthorized', 401)
+  }
+
+  const id =  c.env.ACES_DO.idFromName(ACES_DO_NAME)
+  const stub = c.env.ACES_DO.get(id)
+  return await stub.fetch(c.req)
+})
+
+app.post('/api/*', async (c) => {
   const user:any = await getSessionUser(c.req, c.env)
   if (!user) {
     return c.text('Unauthorized', 401)
