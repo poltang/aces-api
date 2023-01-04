@@ -130,13 +130,11 @@ export class TenantDurable {
       /* CHECK */ await this.initData(env, tenantId, kind)
 
       const key = prefixes[kind] + id
-
       const item = await this.storage.get(key)
-
       if (!item) {
         return c.json({message: 'Not Found'}, 404)
       }
-      // return c.json(objectify(item))
+
       return c.json(item)
     })
 

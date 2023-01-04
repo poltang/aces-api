@@ -24,6 +24,11 @@ app.use('*', async (c, next) => {
 })
 
 app.get('/', async (c) => {
+  if (globalThis.MINIFLARE) {
+    console.log('Running in local/dev mode')
+  } else {
+    console.log('Running in production')
+  }
   const list = await c.env.KV.list({ prefix: 'cred:' })
   console.log("list", list.keys.length)
   if (list.keys.length == 0) {
