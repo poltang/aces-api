@@ -1,0 +1,1749 @@
+Last login: Fri Dec 23 03:21:11 on ttys014
+2023-01-03 9:15:33 aces-workers > npx create-cloudflare aces-api https://github.com/honojs/hono-minimal
+
+    Success 🎉
+    Your "aces-api" directory is ready for you~!
+
+2023-01-03 9:15:57 aces-workers > cd aces-api
+2023-01-03 9:16:36 aces-api > code .
+2023-01-03 9:18:01 aces-api > # update package.json wrangler.tom
+2023-01-03 9:24:08 aces-api > git add . && gcam "First commit"
+[main (root-commit) 42771ef] First commit
+ 8 files changed, 145 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+ create mode 100644 jest.config.js
+ create mode 100644 package.json
+ create mode 100644 src/index.test.ts
+ create mode 100644 src/index.ts
+ create mode 100644 tsconfig.json
+ create mode 100644 wrangler.toml
+2023-01-03 9:27:37 aces-api > yarn install
+yarn install v1.22.19
+info No lockfile found.
+[1/4] 🔍  Resolving packages...
+warning esbuild-jest > babel-jest > @jest/transform > jest-haste-map > sane@4.1.0: some dependency vulnerabilities fixed, support for node < 10 dropped, and newer ECMAScript syntax/features added
+warning esbuild-jest > babel-jest > @jest/transform > jest-haste-map > sane > micromatch > snapdragon > source-map-resolve@0.5.3: See https://github.com/lydell/source-map-resolve#deprecated
+warning esbuild-jest > babel-jest > @jest/transform > jest-haste-map > sane > micromatch > snapdragon > source-map-resolve > resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
+warning esbuild-jest > babel-jest > @jest/transform > jest-haste-map > sane > micromatch > snapdragon > source-map-resolve > source-map-url@0.4.1: See https://github.com/lydell/source-map-url#deprecated
+warning esbuild-jest > babel-jest > @jest/transform > jest-haste-map > sane > micromatch > snapdragon > source-map-resolve > urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
+warning wrangler > @esbuild-plugins/node-modules-polyfill > rollup-plugin-node-polyfills > rollup-plugin-inject@3.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-inject.
+warning wrangler > @esbuild-plugins/node-modules-polyfill > rollup-plugin-node-polyfills > rollup-plugin-inject > magic-string > sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+[2/4] 🚚  Fetching packages...
+[3/4] 🔗  Linking dependencies...
+[4/4] 🔨  Building fresh packages...
+success Saved lockfile.
+✨  Done in 76.89s.
+2023-01-03 9:29:13 aces-api > wrangler kv:namespace create ACES_KV
+ ⛅️ wrangler 2.6.2
+-------------------
+🌀 Creating namespace with title "aces-api-ACES_KV"
+✨ Success!
+Add the following to your configuration file in your kv_namespaces array:
+{ binding = "ACES_KV", id = "ca57fd4fad87497fb8c8deeead9d8f73" }
+2023-01-03 9:38:10 aces-api > wrangler d1 create aces-data
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+✅ Successfully created DB 'aces-data'!
+
+Add the following to your wrangler.toml to connect to it from a Worker:
+
+[[ d1_databases ]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "aces-data"
+database_id = "f13e4747-0c58-4f1e-8a8e-2eda1bb5118c"
+2023-01-03 9:43:42 aces-api > wrangler d1 create aces-data --local --file=./schema/v0.sql
+
+✘ [ERROR] Unknown arguments: local, file
+
+
+wrangler d1 create <name>
+
+Create D1 database
+
+Positionals:
+  name  The name of the new DB  [string] [required]
+
+Flags:
+  -c, --config   Path to .toml configuration file  [string]
+  -e, --env      Environment to use for operations and .env files  [string]
+  -h, --help     Show help  [boolean]
+  -v, --version  Show version number  [boolean]
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+2023-01-03 10:23:03 aces-api > wrangler d1 execute aces-data --local --file=./schema/v0.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+About to create .wrangler/state/d1/DB.sqlite3, ok? (y/n)
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 10:23:54 aces-api > wrangler d1 execute aces-data --file=./schema/v0.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 22 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 22 commands in 7.404064001515508ms
+2023-01-03 10:24:05 aces-api > mkdir seeds
+2023-01-03 10:46:32 aces-api > wrangler d1 execute aces-data --file=./schema/modules.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 2 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 2 commands in 216.30570600088686ms
+2023-01-03 11:06:58 aces-api > wrangler d1 execute aces-data --local --file=./schema/modules.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 11:07:41 aces-api > wrangler d1 execute aces-data --local --file=./schema/others.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 12:42:59 aces-api > wrangler d1 execute aces-data --file=./schema/others.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 5 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 5 commands in 185.55223800241947ms
+2023-01-03 12:43:10 aces-api > wrangler d1 execute aces-data --local --file=./schema/v0.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 16:19:22 aces-api > wrangler d1 execute aces-data --local --file=./schema/data.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 16:21:17 aces-api > wrangler d1 execute aces-data --local --command "INSERT INTO admins ([username],[fullname],[email],[role],[status]) VALUES ('poltang','Gaia Poltangan','adminits@gaiasol.com','super-admin','active')"
+2023-01-03 16:54:57 aces-api > wrangler d1 execute aces-data --local --command "CREATE TABLE 'admins'
+(
+    [id] TEXT PRIMARY KEY NOT NULL, -- ObjectId
+    [username] TEXT UNIQUE NOT NULL,
+    [fullname] TEXT NOT NULL,
+    [email] TEXT UNIQUE NOT NULL,
+    [role] TEXT DEFAULT '',
+    [status] TEXT DEFAULT '',
+    [created] TEXT NOT NULL DEFAULT (datetime('now')||'Z'),
+    [updated] TEXT NOT NULL DEFAULT (datetime('now')||'Z')
+)"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 16:56:28 aces-api > wrangler d1 execute aces-data --command "CREATE TABLE 'admins'
+(
+    [id] TEXT PRIMARY KEY NOT NULL, -- ObjectId
+    [username] TEXT UNIQUE NOT NULL,
+    [fullname] TEXT NOT NULL,
+    [email] TEXT UNIQUE NOT NULL,
+    [role] TEXT DEFAULT '',
+    [status] TEXT DEFAULT '',
+    [created] TEXT NOT NULL DEFAULT (datetime('now')||'Z'),
+    [updated] TEXT NOT NULL DEFAULT (datetime('now')||'Z')
+)"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 1 statements
+Attempting to login via OAuth...
+Opening a link in your default browser: https://dash.cloudflare.com/oauth2/auth?response_type=code&client_id=54d11594-84e4-41aa-b438-e81b8fa78ee7&redirect_uri=http%3A%2F%2Flocalhost%3A8976%2Foauth%2Fcallback&scope=account%3Aread%20user%3Aread%20workers%3Awrite%20workers_kv%3Awrite%20workers_routes%3Awrite%20workers_scripts%3Awrite%20workers_tail%3Aread%20d1%3Awrite%20pages%3Awrite%20zone%3Aread%20offline_access&state=-44hKRIvDxb9tlb80k52JugsUXGA5HJQ&code_challenge=UolUC2jRYD2PjOEfWoPbVwszypcJDOsDESrUyEJmyGc&code_challenge_method=S256
+
+✘ [ERROR]
+
+
+If you think this is a bug then please create an issue at https://github.com/cloudflare/wrangler2/issues/new/choose
+2023-01-03 16:58:41 aces-api > wrangler d1 execute aces-data --command "CREATE TABLE 'admins'
+(
+    [id] TEXT PRIMARY KEY NOT NULL, -- ObjectId
+    [username] TEXT UNIQUE NOT NULL,
+    [fullname] TEXT NOT NULL,
+    [email] TEXT UNIQUE NOT NULL,
+    [role] TEXT DEFAULT '',
+    [status] TEXT DEFAULT '',
+    [created] TEXT NOT NULL DEFAULT (datetime('now')||'Z'),
+    [updated] TEXT NOT NULL DEFAULT (datetime('now')||'Z')
+)"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 1 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 1 command in 85.48439300060272ms
+2023-01-03 16:59:15 aces-api > wrangler d1 execute aces-data --command "INSERT INTO admins ([username],[fullname],[email],[role],[status]) VALUES ('poltang','Gaia Poltangan','adminits@gaiasol.com','super-admin','active')"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 1 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+
+✘ [ERROR] A request to the Cloudflare API (/accounts/62a28985e71156ba30ac9f813e0f4b02/d1/database/f13e4747-0c58-4f1e-8a8e-2eda1bb5118c/query) failed.
+
+  ERROR 9015: SQL engine error: failed to read next row: NOT NULL constraint failed: admins.id
+  [code: 7500]
+
+  If you think this is a bug, please open an issue at:
+  https://github.com/cloudflare/wrangler2/issues/new/choose
+
+
+2023-01-03 17:00:09 aces-api > wrangler d1 execute aces-data --command "DROP TABLE IF EXISTS 'admins';CREATE TABLE 'admins'
+(
+    [id] INTEGER PRIMARY KEY NOT NULL, -- ObjectId
+    [username] TEXT UNIQUE NOT NULL,
+    [fullname] TEXT NOT NULL,
+    [email] TEXT UNIQUE NOT NULL,
+    [role] TEXT DEFAULT '',
+    [status] TEXT DEFAULT '',
+    [created] TEXT NOT NULL DEFAULT (datetime('now')||'Z'),
+    [updated] TEXT NOT NULL DEFAULT (datetime('now')||'Z')
+)"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 2 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 2 commands in 7.646148003637791ms
+2023-01-03 17:02:10 aces-api > wrangler d1 execute aces-data --command "INSERT INTO admins ([username],[fullname],[email],[role],[status]) VALUES ('poltang','Gaia Poltangan','adminits@gaiasol.com','super-admin','active')"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 1 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 1 command in 12.425811000168324ms
+2023-01-03 17:02:25 aces-api > wrangler d1 execute aces-data --local --command "DROP TABLE IF EXISTS 'admins';CREATE TABLE 'admins'
+(
+    [id] INTEGER PRIMARY KEY NOT NULL, -- ObjectId
+    [username] TEXT UNIQUE NOT NULL,
+    [fullname] TEXT NOT NULL,
+    [email] TEXT UNIQUE NOT NULL,
+    [role] TEXT DEFAULT '',
+    [status] TEXT DEFAULT '',
+    [created] TEXT NOT NULL DEFAULT (datetime('now')||'Z'),
+    [updated] TEXT NOT NULL DEFAULT (datetime('now')||'Z')
+)"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 17:02:52 aces-api > wrangler d1 execute aces-data --local --command "INSERT INTO admins ([username],[fullname],[email],[role],[status]) VALUES ('poltang','Gaia Poltangan','adminits@gaiasol.com','super-admin','active')"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 17:03:08 aces-api > wrangler d1 execute aces-data --local --command "DROP TABLE IF EXISTS 'admins';CREATE TABLE 'admins'
+(
+    [id] TEXT PRIMARY KEY NOT NULL, -- ObjectId
+    [username] TEXT UNIQUE NOT NULL,
+    [fullname] TEXT NOT NULL,
+    [email] TEXT UNIQUE NOT NULL,
+    [role] TEXT DEFAULT '',
+    [status] TEXT DEFAULT '',
+    [created] TEXT NOT NULL DEFAULT (datetime('now')||'Z'),
+    [updated] TEXT NOT NULL DEFAULT (datetime('now')||'Z')
+)"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 17:44:00 aces-api > wrangler d1 execute aces-data --command "DROP TABLE IF EXISTS 'admins';CREATE TABLE 'admins'
+(
+    [id] TEXT PRIMARY KEY NOT NULL, -- ObjectId
+    [username] TEXT UNIQUE NOT NULL,
+    [fullname] TEXT NOT NULL,
+    [email] TEXT UNIQUE NOT NULL,
+    [role] TEXT DEFAULT '',
+    [status] TEXT DEFAULT '',
+    [created] TEXT NOT NULL DEFAULT (datetime('now')||'Z'),
+    [updated] TEXT NOT NULL DEFAULT (datetime('now')||'Z')
+)"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 2 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 2 commands in 162.74637800082564ms
+2023-01-03 17:44:20 aces-api > wrangler d1 execute aces-data --local --command "INSERT INTO admins ([id],[username],[fullname],[email],[role],[status]) VALUES ('6397c47ba009344a26c0db97','poltang','Gaia Poltangan','adminits@gaiasol.com','super-admin','active')"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Loading DB at .wrangler/state/d1/DB.sqlite3
+2023-01-03 17:45:23 aces-api > wrangler d1 execute aces-data --command "INSERT INTO admins ([id],[username],[fullname],[email],[role],[status]) VALUES ('6397c47ba009344a26c0db97','poltang','Gaia Poltangan','adminits@gaiasol.com','super-admin','active')"
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 1 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 1 command in 15.108566999435425ms
+2023-01-03 17:45:41 aces-api > open .
+2023-01-03 18:04:53 aces-api > open .wrangler/state/do
+2023-01-03 18:05:17 aces-api > ll seeds
+total 48
+-rw-r--r--  1 polt  staff   579B Jan  3 20:15 creds.json
+-rw-r--r--  1 polt  staff   504B Jan  3 12:19 index.ts
+-rw-r--r--  1 polt  staff   3.4K Jan  3 10:52 module-groups.ts
+-rw-r--r--  1 polt  staff    12K Jan  3 10:52 modules.ts
+2023-01-04 4:36:41 aces-api > git status
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .gitignore
+	modified:   src/index.ts
+	modified:   wrangler.toml
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.vscode/
+	schema/
+	seeds/
+	src/AcesDurable.ts
+	src/TenantDurable.ts
+	src/auth.ts
+	src/crypto.ts
+	src/d1_beta.js
+	src/env.ts
+	src/session.ts
+	src/signin-html.ts
+	src/types.ts
+	src/utils.ts
+	wrangler.toml.example
+
+no changes added to commit (use "git add" and/or "git commit -a")
+2023-01-04 7:24:26 aces-api > git status
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .gitignore
+	modified:   src/index.ts
+	modified:   wrangler.toml
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	schema/
+	seeds/
+	src/AcesDurable.ts
+	src/TenantDurable.ts
+	src/auth.ts
+	src/crypto.ts
+	src/d1_beta.js
+	src/env.ts
+	src/session.ts
+	src/signin-html.ts
+	src/types.ts
+	src/utils.ts
+	wrangler.toml.example
+
+no changes added to commit (use "git add" and/or "git commit -a")
+2023-01-04 8:12:04 aces-api > git status
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .gitignore
+	modified:   src/index.ts
+	modified:   wrangler.toml
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	schema/
+	src/AcesDurable.ts
+	src/TenantDurable.ts
+	src/auth.ts
+	src/crypto.ts
+	src/d1_beta.js
+	src/env.ts
+	src/session.ts
+	src/signin-html.ts
+	src/types.ts
+	src/utils.ts
+	wrangler.toml.example
+
+no changes added to commit (use "git add" and/or "git commit -a")
+2023-01-04 8:16:00 aces-api > git log
+2023-01-04 8:16:58 aces-api > git add . && gcam 'Add DurableObjects'
+[main c2424c1] Add DurableObjects
+ 16 files changed, 1436 insertions(+), 4 deletions(-)
+ create mode 100644 schema/data.sql
+ create mode 100644 schema/v0.sql
+ create mode 100644 src/AcesDurable.ts
+ create mode 100644 src/TenantDurable.ts
+ create mode 100644 src/auth.ts
+ create mode 100644 src/crypto.ts
+ create mode 100644 src/d1_beta.js
+ create mode 100644 src/env.ts
+ create mode 100644 src/session.ts
+ create mode 100644 src/signin-html.ts
+ create mode 100644 src/types.ts
+ create mode 100644 src/utils.ts
+ create mode 100644 wrangler.toml.example
+2023-01-04 8:17:42 aces-api > git status
+On branch main
+nothing to commit, working tree clean
+2023-01-04 8:17:44 aces-api > yarn deploy
+yarn run v1.22.19
+$ wrangler publish src/index.ts
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+Your worker has access to the following bindings:
+- Durable Objects:
+  - ACES_DURABLE: AcesDurable
+  - TENANT_DURABLE: TenantDurable
+- KV Namespaces:
+  - KV: ca57fd4fad87497fb8c8deeead9d8f73
+- D1 Databases:
+  - DB: aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c), Preview: (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c)
+- Vars:
+  - COOKIE_NAME: "aces-auth"
+  - COOKIE_PASSWORD: "PJhb_GceyJ0-c0db97eXAiOiJ-KV1Q-LiOiJI..."
+  - CORS_ORIGIN: "http://localhost:8787;http://localhos..."
+Total Upload: 143.92 KiB / gzip: 30.69 KiB
+Uploaded aces-api (6.33 sec)
+Published aces-api (7.39 sec)
+  https://aces-api.poltang.workers.dev
+Current Deployment ID: 21b18c91-7383-439c-afad-85ebcf915ac6
+✨  Done in 19.18s.
+2023-01-04 8:18:12 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T07:19:35Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/ - Ok @ 1/4/2023, 8:19:46 AM
+  (log) KV {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-03T13:34:16.608Z'
+  }
+}
+GET https://aces-api.poltang.workers.dev/favicon.ico - Ok @ 1/4/2023, 8:19:47 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:19:47 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:20:08 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:20:15 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:20:51 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:21:10 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:21:35 AM
+  (log) secret null
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:22:45 AM
+x
+^C%                                                                                                   2023-01-04 8:25:12 aces-api > yarn deploy
+yarn run v1.22.19
+$ wrangler publish src/index.ts
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+Your worker has access to the following bindings:
+- Durable Objects:
+  - ACES_DURABLE: AcesDurable
+  - TENANT_DURABLE: TenantDurable
+- KV Namespaces:
+  - KV: ca57fd4fad87497fb8c8deeead9d8f73
+- D1 Databases:
+  - DB: aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c), Preview: (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c)
+- Vars:
+  - COOKIE_NAME: "aces-auth"
+  - COOKIE_PASSWORD: "PJhb_GceyJ0-c0db97eXAiOiJ-KV1Q-LiOiJI..."
+  - CORS_ORIGIN: "http://localhost:8787;http://localhos..."
+Total Upload: 143.95 KiB / gzip: 30.70 KiB
+Uploaded aces-api (6.34 sec)
+Published aces-api (1.75 sec)
+  https://aces-api.poltang.workers.dev
+Current Deployment ID: 85d4f31f-60cd-43da-a537-a84dd4a3bced
+✨  Done in 12.74s.
+2023-01-04 8:27:49 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T07:19:35Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/ - Ok @ 1/4/2023, 8:28:36 AM
+  (log) list 0
+  (log) KV {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:28:37.301Z'
+  }
+}
+GET https://aces-api.poltang.workers.dev/favicon.ico - Ok @ 1/4/2023, 8:28:38 AM
+GET https://aces-api.poltang.workers.dev/ - Ok @ 1/4/2023, 8:28:50 AM
+  (log) list 0
+  (log) KV {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:28:50.285Z'
+  }
+}
+GET https://aces-api.poltang.workers.dev/ - Ok @ 1/4/2023, 8:29:00 AM
+  (log) list 0
+  (log) KV {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:00.741Z'
+  }
+}
+GET https://aces-api.poltang.workers.dev/data/modules - Ok @ 1/4/2023, 8:30:58 AM
+GET https://aces-api.poltang.workers.dev/data/modules - Ok @ 1/4/2023, 8:31:04 AM
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 8:31:39 AM
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 8:31:39 AM
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/modules
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 8:31:57 AM
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 8:32:06 AM
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 8:32:19 AM
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 8:32:23 AM
+GET https://aces-api.poltang.workers.dev/data/modules - Ok @ 1/4/2023, 8:32:26 AM
+GET https://aces-api.poltang.workers.dev/ - Ok @ 1/4/2023, 8:32:32 AM
+  (log) list 6
+  (log) KV {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:00.741Z'
+  }
+}
+GET https://aces-api.poltang.workers.dev/favicon.ico - Ok @ 1/4/2023, 8:32:33 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:32:49 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:32:58 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:33:23 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:33:35 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:33:41 AM
+  (log) secret null
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:35:17 AM
+  (log) secret null
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:36:31 AM
+  (log) secret null
+GET https://aces-api.poltang.workers.dev/ - Ok @ 1/4/2023, 8:36:37 AM
+  (log) list 6
+  (log) KV {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:00.741Z'
+  }
+}
+GET https://aces-api.poltang.workers.dev/favicon.ico - Ok @ 1/4/2023, 8:36:38 AM
+^C%                                                                                                   2023-01-04 8:37:33 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T07:19:35Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/ - Ok @ 1/4/2023, 8:42:55 AM
+  (log) list 6
+  (log) KV {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:00.741Z'
+  }
+}
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 8:43:14 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:43:18 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:43:23 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:43:41 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:43:50 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:44:04 AM
+  (log) RS {
+  userId: '6397c47ba009344a26c0db92',
+  tenantId: '6397c202f3d8a77b799c4293',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'dahlia',
+  email: 'dahlia@yahoo.com',
+  fullName: 'Dahlia Ningtyas',
+  orgName: 'PT Gaia Solutions',
+  expiryDate: '2023-12-13T02:17:40.020Z'
+}
+  (log) key cred:undefined
+  (log) secret { value: null, metadata: null }
+^C%                                                                                                   2023-01-04 8:44:54 aces-api >
+2023-01-04 8:46:10 aces-api >
+2023-01-04 8:46:11 aces-api > wrangler d1 execute aces-data --file=schema/v0.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 36 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 36 commands in 148.4898639768362ms
+2023-01-04 8:47:17 aces-api > wrangler d1 execute aces-data --file=schema/data.sql
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+🚧 D1 is currently in open alpha and is not recommended for production data and traffic.
+Please report any bugs to https://github.com/cloudflare/wrangler2/issues/new/choose.
+To request features, visit https://community.cloudflare.com/c/developers/d1.
+To give feedback, visit https://discord.gg/cloudflaredev
+🌀 Mapping SQL input into an array of statements
+🌀 Parsing 7 statements
+🌀 Executing on aces-data (f13e4747-0c58-4f1e-8a8e-2eda1bb5118c):
+🚣 Executed 7 commands in 28.852030009031296ms
+2023-01-04 8:47:40 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T07:19:35Z
+Connected to aces-api, waiting for logs...
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:48:04 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db92',
+  tenantId: '6397c202f3d8a77b799c4293',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'dahlia',
+  email: 'dahlia@yahoo.com',
+  fullname: 'Dahlia Ningtyas',
+  orgName: 'PT Gaia Solutions',
+  expiryDate: '2023-12-13T02:17:40.020Z'
+}
+  (log) key cred:6397c47ba009344a26c0db92
+  (log) secret {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db92',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:01.564Z'
+  }
+}
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:48:16 AM
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 8:48:31 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:49:05 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:49:36 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db91',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'hendro',
+  email: 'hendro@gmail.com',
+  fullname: 'Hendro Darmawan',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z'
+}
+  (log) key cred:6397c47ba009344a26c0db91
+  (log) secret {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db91',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:01.360Z'
+  }
+}
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:49:55 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db91',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'hendro',
+  email: 'hendro@gmail.com',
+  fullname: 'Hendro Darmawan',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z'
+}
+  (log) key cred:6397c47ba009344a26c0db91
+  (log) secret {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db91',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:01.360Z'
+  }
+}
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:50:26 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db8e',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'nining',
+  email: 'nining@yahoo.com',
+  fullname: 'Nining Prasetya',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z'
+}
+  (log) key cred:6397c47ba009344a26c0db8e
+  (log) secret {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:00.741Z'
+  }
+}
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:52:01 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db8e',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'nining',
+  email: 'nining@yahoo.com',
+  fullname: 'Nining Prasetya',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z'
+}
+  (log) key cred:6397c47ba009344a26c0db8e
+  (log) secret {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:00.741Z'
+  }
+}
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:52:17 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db92',
+  tenantId: '6397c202f3d8a77b799c4293',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'dahlia',
+  email: 'dahlia@yahoo.com',
+  fullname: 'Dahlia Ningtyas',
+  orgName: 'PT Gaia Solutions',
+  expiryDate: '2023-12-13T02:17:40.020Z'
+}
+  (log) key cred:6397c47ba009344a26c0db92
+  (log) secret {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db92',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:01.564Z'
+  }
+}
+^C%                                                                                                   2023-01-04 8:53:42 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T07:19:35Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 8:55:44 AM
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 8:55:54 AM
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 8:55:54 AM
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/modules
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 8:56:07 AM
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 8:56:17 AM
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 8:56:18 AM
+  (log) TenantDurable()
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) TenantDurable:/tenant
+  (log) Load tenant from db
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 8:56:34 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) TenantDurable:/tenant/accounts
+  (log) tenantId: 6397c202f3d8a77b799c4293
+  (log) Restoring from table [accounts]...
+  (log) Storage size: 3
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 8:56:34 AM
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 8:56:45 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) TenantDurable:/tenant/clients
+  (log) tenantId: 6397c202f3d8a77b799c4293
+  (log) Restoring from table [clients]...
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 8:56:45 AM
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 8:56:51 AM
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 8:56:51 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) TenantDurable:/tenant/projects
+  (log) tenantId: 6397c202f3d8a77b799c4293
+  (log) Restoring from table [projects]...
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 8:57:06 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:57:12 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:57:16 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:57:51 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:57:58 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:58:17 AM
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 8:58:43 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:58:50 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:58:54 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 8:58:58 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db8e',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'nining',
+  email: 'nining@yahoo.com',
+  fullname: 'Nining Prasetya',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z'
+}
+  (log) key cred:6397c47ba009344a26c0db8e
+  (log) data {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db8e',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:00.741Z'
+  }
+}
+  (log) USER {
+  id: '6397c47ba009344a26c0db8e',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: true,
+  mcount: 1,
+  username: 'nining',
+  email: 'nining@yahoo.com',
+  fullname: 'Nining Prasetya',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z',
+  loginType: 'tenant',
+  ts: 1672797538765
+}
+  (log) sealedData: Fe26.2*1*26741c625a55f2b1dd03e49119761dd4bfe94ef263493504814928926a75d46a*Do0ZED_YCo6cHQWCn91tZw*fSgDlKwQHLNhkrzJptp2D42N_Y9Z8iWwHEIEH9wvZdBH8TmjDVgJoFo48HKbpm1TaZaqeporrv_hXzX8voWtX133BPVON76q0r-FzBbJ6Tzh6tJlLBCoZnUkfMKBJXqPwkg8SVL4dg3gVLZfmuoNhP77NXrM9GsEiRKAr-Z2gQCkosn2CaUhBmtwt0fv6O3gQ8T-ek0fU_J0m_eFYhpOYKU74GpWSf2EfAcM3XSiMaOjOlb8XILnyacN-Hly-5tul8zQZakatwSVV5Fl4fWc0dkjY91WkTNNLCwsyloLMdUtIAqvHrbftzYI8QBlbBiVEtVPkzM-5UIhh4g01nBFZWv50RIM9OKtjI8_fkSqaS9-1XNtbBEtPywfTl3ZJaNqWxMuDMSA8YwnFo-duKuH7fZ-DuGX1o47euevMD1Mdg-31Im_WAqpX42xWUMNCl-C*1674093538765*e89c0ced97e734e6bd1d13fb8d0a46772b9e6df49e0b7e792c03e85ed60e833f*oO0Dq2lWBZWMblUBOs6S-mfm_yXuQuYkdoOIB12fDwM~2
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 8:59:03 AM
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 8:59:03 AM
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/modules
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 9:00:01 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:00:05 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:00:09 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:00:16 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:00:35 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:01:22 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:01:53 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:01:55 AM
+/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:27100
+            throw ex;
+            ^
+
+TypeError: fetch failed
+    at fetch10 (/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:13582:17)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async performApiFetch (/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:144396:10)
+    at async fetchInternal (/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:144405:20)
+    at async fetchResult (/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:143558:16)
+    at async deleteTail (/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:159266:5)
+    at async WebSocket2.<anonymous> (/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:164113:5) {
+  cause: ConnectTimeoutError: Connect Timeout Error
+      at onConnectTimeout (/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:6526:29)
+      at /Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:6484:51
+      at Immediate._onImmediate (/Users/polt/aces-workers/aces-api/node_modules/wrangler/wrangler-dist/cli.js:6515:13)
+      at processImmediate (node:internal/timers:464:21) {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+2023-01-04 9:06:35 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T07:19:35Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:08:04 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:08:17 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:08:30 AM
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 9:08:48 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:08:59 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:09:09 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:09:14 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db93',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 2,
+  username: 'yosep',
+  email: 'yosep@gaiasol.com',
+  fullname: 'Yosep Tripriyanto',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z'
+}
+  (log) key cred:6397c47ba009344a26c0db93
+  (log) data {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db93',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:01.766Z'
+  }
+}
+  (log) USER {
+  id: '6397c47ba009344a26c0db93',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: true,
+  mcount: 2,
+  username: 'yosep',
+  email: 'yosep@gaiasol.com',
+  fullname: 'Yosep Tripriyanto',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z',
+  loginType: 'tenant',
+  ts: 1672798154668
+}
+  (log) sealedData: Fe26.2*1*301a2151971e8fabc9442915ba080cad99d65ea3678ea192b06db29a00ee30fb*aAMGytRP0xO00yAW4FbO3A*LzTnvlv-Jruqaz4kur5rBHGCWJKTg6pbYB6DmeFQYug6AajDl7Et4xEncj1wYymD2adhMilLCpCfmwxlgI7MtpDmNbCKWAIE9s6uIna-vZnB9U-p_RlcqY-vyiec6e2BCga42WK0NB58GqFBUO6JI9xQpe0MKnxaJIM6OTidXxMFv5Sw_D_xEYG3EXK019J8VHXUb6uIaLpEnbbKwcqwsICLHSTcwWqQvt90yScP9bVLnF70hx8d_tHXfTHFIVdUQldFbnrKKhPLb8fN2uxX8WLV1N6IHSMII_p6dgO_qKZQSldDn_jdvs8jvZ52aS7GyEX7D1I_n7pp9G_XDJyi5XTwPEi9fJPvnbnRZFvRFtNrbQCSGKxMaLhEL-w1Tv_ZNJL9L-BKAyO4wwTi1Ib5_Sll3cXIgHlcWqbBdUAq1y9Gb_xlzE-NZdSm3-Jw1B-b*1674094154668*d1230a45268827b27e555b1b391b46b78b2deabd5f01ac362a650f37fef9ffaf*fGDWDz8SVnFrwbSTUwlogxo4-XvDiLVVUS3Svj0dt7Q~2
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 9:09:24 AM
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/modules
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 9:09:24 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:09:45 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:09:53 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:10:06 AM
+GET https://aces-api.poltang.workers.dev/ - Canceled @ 1/4/2023, 9:12:24 AM
+2023-01-04 9:16:59 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T08:29:08Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:29:12 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:29:21 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:29:33 AM
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:29:33 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:29:44 AM
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 9:30:17 AM
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 9:30:20 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:30:26 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:30:26 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 9:30:35 AM
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 9:31:10 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:31:15 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:31:22 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:31:22 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:31:24 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:31:33 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:31:33 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 9:31:48 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:32:08 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:32:15 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db92',
+  tenantId: '6397c202f3d8a77b799c4293',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'dahlia',
+  email: 'dahlia@yahoo.com',
+  fullname: 'Dahlia Ningtyas',
+  orgName: 'PT Gaia Solutions',
+  expiryDate: '2023-12-13T02:17:40.020Z'
+}
+  (log) key cred:6397c47ba009344a26c0db92
+  (log) data {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db92',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:01.564Z'
+  }
+}
+  (log) USER {
+  id: '6397c47ba009344a26c0db92',
+  tenantId: '6397c202f3d8a77b799c4293',
+  role: '',
+  status: 'active',
+  isDefault: true,
+  mcount: 1,
+  username: 'dahlia',
+  email: 'dahlia@yahoo.com',
+  fullname: 'Dahlia Ningtyas',
+  orgName: 'PT Gaia Solutions',
+  expiryDate: '2023-12-13T02:17:40.020Z',
+  loginType: 'tenant',
+  ts: 1672799536010
+}
+  (log) sealedData: Fe26.2*1*a12a708d86c4375d5a5407c71f21550d5061692437affb526a5c5b42866a70ca*n_wm1QAJgud_pK3KJOH-ew*BbbZNRbXZnp8n39RmUeC_oGZ5E17bRubN-DXjWi1t9LK8fAlAM87cW1lD_N0TVNGZC3ru8Vvtpl4OBB_5hQWxZtYNOo2-H2p6Y3ZLkJ2k9TDr5b821Nb9FMYU5B-QJd3m0N0Zwi-RO3mAQj_Jthmr1K6yfu8r6-KcREceM-CsYbCXfF65hMiq0GKNCmaUG53iBpnbjm_dAjS2WnpJ44PuOt105PkVGqC6U1UCbnXOjDqyr0oM0CMxcs7_UUASOK3WGwLnzQZPm5IG0pJgjX88fr2KoiV9KWEtQKrn-fJQweCkoq9C5Isw2Js4Q5gebk4JUt8Rpnoa27KhO6tX2UdUB_2eacGxM_pD24ZsMPbtpre37qH9TadEe1JM30nGpCBU5d2q_gc52EW6BbXhXVaqoGo5jyuuzxCfLVPGcFFCMo*1674095536010*0f5e6270cb8ec9140fd79d4ec9b75ab88c21cec386f384e5093cc9a6424928ac*ucMVBZ9z58Ic2n4Xrd4uLEty7y4kyAy6XbtIxj4BgnQ~2
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:32:24 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:32:32 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:33:00 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:33:00 AM
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:33:12 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:33:57 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:33:57 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:34:13 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:34:19 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:34:19 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:34:27 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:35:23 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:35:23 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:36:10 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:36:18 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:36:58 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:37:05 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:37:05 AM
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/signin
+  (log) found {
+  id: '6397c47ba009344a26c0db97',
+  username: 'poltang',
+  fullname: 'Gaia Poltangan',
+  email: 'adminits@gaiasol.com',
+  role: 'super-admin',
+  status: 'active',
+  created: '2023-01-04 01:47:16Z',
+  updated: '2023-01-04 01:47:16Z'
+}
+  (log) data {
+  id: '6397c47ba009344a26c0db97',
+  fullname: 'Gaia Poltangan',
+  username: 'poltang',
+  email: 'adminits@gaiasol.com',
+  role: 'super-admin',
+  status: 'active',
+  secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  created: '2023-01-04T01:31:39.858Z',
+  updated: '2023-01-04T01:31:39.858Z'
+}
+  (log) user: {
+  id: '6397c47ba009344a26c0db97',
+  loginType: 'aces',
+  fullname: 'Gaia Poltangan',
+  username: 'poltang',
+  email: 'adminits@gaiasol.com',
+  role: 'super-admin',
+  status: 'active',
+  ts: 1672799825837
+}
+  (log) sealedData: Fe26.2*1*fd9382a88314f9eebeb4b1a125b78d3d03825c609f596b388a8bbbb20ef324fe*OJp3zE3J-6VgV6Kpgp2p_w*hD-6SWSOstTYSzfdD9w--ClGAF8I5sWKucmm1NSHOj1dtG6q_Tp1bbNaLTjCJpppxPCT8j7-EGCGGizb8HhzCrtnfIMwbyDTsmvSSgdqGQqN6EJviU2XGhmLc3fbDYS6cL3Pk4qI2rOcwFbhIO-lxaNOALNuCRvuWHkjxnZ4J0jGXV9yVt_nXY5GNrDMjed6M2szhXXQp6EKepZI7tpFVhmTym57gFsA-e0a44jcZfRimA2FNCijxwdzJgVxRcYB*1674095825837*710b1909a5de50d88e617f17172da306af3dc4b477cd66d40fa308fefafda997*5MZIcmOIMbFEi2mWEQ8EYsP6DITJRLBJSuiiF3C86E8~2
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 9:37:23 AM
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:37:41 AM
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:37:41 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:38:00 AM
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:38:00 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/admins - Ok @ 1/4/2023, 9:38:22 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+GET https://aces-api.poltang.workers.dev/aces/admins - Ok @ 1/4/2023, 9:38:22 AM
+GET https://aces-api.poltang.workers.dev/aces/admins - Ok @ 1/4/2023, 9:38:39 AM
+GET https://aces-api.poltang.workers.dev/aces/admins - Ok @ 1/4/2023, 9:38:39 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+GET https://aces-api.poltang.workers.dev/aces/admins - Ok @ 1/4/2023, 9:38:44 AM
+GET https://aces-api.poltang.workers.dev/aces/admins - Ok @ 1/4/2023, 9:38:44 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+GET https://aces-api.poltang.workers.dev/aces/admins - Ok @ 1/4/2023, 9:38:47 AM
+GET https://aces-api.poltang.workers.dev/aces/admins - Ok @ 1/4/2023, 9:38:47 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:39:35 AM
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:39:35 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/module-groups - Ok @ 1/4/2023, 9:39:42 AM
+GET https://aces-api.poltang.workers.dev/aces/module-groups - Ok @ 1/4/2023, 9:39:42 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/module-groups
+GET https://aces-api.poltang.workers.dev/aces/modules?method=selftest - Ok @ 1/4/2023, 9:40:03 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules?method=selftest - Ok @ 1/4/2023, 9:40:03 AM
+GET https://aces-api.poltang.workers.dev/aces/modules?method=assisted - Ok @ 1/4/2023, 9:40:15 AM
+GET https://aces-api.poltang.workers.dev/aces/modules?method=assisted - Ok @ 1/4/2023, 9:40:15 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules?method=assisted - Ok @ 1/4/2023, 9:40:33 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules?method=assisted - Ok @ 1/4/2023, 9:40:33 AM
+GET https://aces-api.poltang.workers.dev/aces/modules?method=assisted - Ok @ 1/4/2023, 9:40:37 AM
+GET https://aces-api.poltang.workers.dev/aces/modules?method=assisted - Ok @ 1/4/2023, 9:40:37 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules?method=assisted - Ok @ 1/4/2023, 9:40:39 AM
+GET https://aces-api.poltang.workers.dev/aces/modules?method=assisted - Ok @ 1/4/2023, 9:40:39 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules?group=INTERVIEW - Ok @ 1/4/2023, 9:41:24 AM
+GET https://aces-api.poltang.workers.dev/aces/modules?group=INTERVIEW - Ok @ 1/4/2023, 9:41:24 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:41:40 AM
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:41:40 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules?group=BIZCASE - Ok @ 1/4/2023, 9:41:56 AM
+GET https://aces-api.poltang.workers.dev/aces/modules?group=BIZCASE - Ok @ 1/4/2023, 9:41:56 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules?group=INTRAY - Ok @ 1/4/2023, 9:43:10 AM
+GET https://aces-api.poltang.workers.dev/aces/modules?group=INTRAY - Ok @ 1/4/2023, 9:43:10 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:43:22 AM
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:43:22 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) AcesDurable:/aces/modules
+^[^C%                                                                                                 2023-01-04 9:47:06 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T08:29:08Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 9:47:18 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) AcesDurable:/modules
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 9:47:18 AM
+GET https://aces-api.poltang.workers.dev/aces/modules - Ok @ 1/4/2023, 9:47:28 AM
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 9:47:37 AM
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 9:47:37 AM
+  (log) TenantDurable()
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant
+  (log) Load tenant from db
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 9:47:49 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant/projects
+  (log) tenantId: 6397c202f3d8a77b799c4291
+  (log) Restoring from table [projects]...
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 9:47:49 AM
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 9:48:04 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant/clients
+  (log) tenantId: 6397c202f3d8a77b799c4291
+  (log) Storage size: 0
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 9:48:04 AM
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 9:48:11 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant/accounts
+  (log) tenantId: 6397c202f3d8a77b799c4291
+  (log) Restoring from table [accounts]...
+  (log) Storage size: 3
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 9:48:11 AM
+GET https://aces-api.poltang.workers.dev/tenant/accounts/6397c47ba009344a26c0db91 - Ok @ 1/4/2023, 9:48:47 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant/accounts/6397c47ba009344a26c0db91
+GET https://aces-api.poltang.workers.dev/tenant/accounts/6397c47ba009344a26c0db91 - Ok @ 1/4/2023, 9:48:47 AM
+GET https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:49:20 AM
+POST https://aces-api.poltang.workers.dev/signin - Ok @ 1/4/2023, 9:49:25 AM
+  (log) RS {
+  id: '6397c47ba009344a26c0db91',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: 1,
+  mcount: 1,
+  username: 'hendro',
+  email: 'hendro@gmail.com',
+  fullname: 'Hendro Darmawan',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z'
+}
+  (log) key cred:6397c47ba009344a26c0db91
+  (log) data {
+  value: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+  metadata: {
+    id: '6397c47ba009344a26c0db91',
+    secret: 'y2o2X8B4ChDQiH5PB0Wxpmd8SsTaeqg=',
+    created: '2023-01-04T01:29:01.360Z'
+  }
+}
+  (log) USER {
+  id: '6397c47ba009344a26c0db91',
+  tenantId: '6397c202f3d8a77b799c4291',
+  role: '',
+  status: 'active',
+  isDefault: true,
+  mcount: 1,
+  username: 'hendro',
+  email: 'hendro@gmail.com',
+  fullname: 'Hendro Darmawan',
+  orgName: 'Badan Kepegawaian Negara',
+  expiryDate: '2023-12-13T02:17:41.086Z',
+  loginType: 'tenant',
+  ts: 1672800566227
+}
+  (log) sealedData: Fe26.2*1*d49335bae10cf3cf5edc46cfa7b40bca128e365d7c26eb575080aa19660a94e7*Cfr206e6Qa6hgekCUtlXSg*sC2poShQHVIvBNAhTle8TOUtyYJIgaEMCdH7UwWsiKENeTZgVJE5hM6RqWLNyHwnoDmjQUBMTqFYpXrOsW3U_rTPs9e4lzzapm5N4XXwNDnexb0aZ9Im6qxl8mEFQnYb2ze4h5IlIInLTGSmevkW6O39H1krUXzAwwg_opijU7YNe1dyYGad5rfkHF3bhpfMC1dprGKHhW7mMT-mMm3WlrbUWgnerBQ9Q1DwTmskjs1QjbjtjEuxpiwZKrTDS1wHz5j3JXzz1cSO2vAAXdHrV2h8Ek8ffRVlLDipTo6Na5zcAQd9zqXv0B1YWfwH3CGzm7gtB22cPjRVM2NlcLNra44guoWln7nQw6bYK1IP3JdyFKZjopYGVLWGMXMAIwl8pPkaJyiLOY23P6v_1Wz00tZd7h5sczFjox-yYPCI7e7poFt6gKpNSICvbU7nqg-B*1674096566227*15a018f31e9f15b3ba2ca7cac9ebe3ae2ec5eb5d9a6b85b4cfe33c49973ddf56*2zl6MgNrObWK32019uOGctH1xyZNmKVhOwsgX_7ejPE~2
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 9:49:31 AM
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) AcesDurable:/modules
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 9:49:31 AM
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 9:49:42 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 9:49:42 AM
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 9:49:48 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant/accounts
+  (log) tenantId: 6397c202f3d8a77b799c4291
+  (log) Storage size: 3
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 9:49:48 AM
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 9:50:05 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant/clients
+  (log) tenantId: 6397c202f3d8a77b799c4291
+  (log) Storage size: 0
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 9:50:05 AM
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 9:50:15 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant/projects
+  (log) tenantId: 6397c202f3d8a77b799c4291
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 9:50:15 AM
+GET https://aces-api.poltang.workers.dev/tenant/ - Ok @ 1/4/2023, 9:50:26 AM
+  (log) 2a09:bac1:3480:18::26a:1e
+  (log) TenantDurable:/tenant/
+GET https://aces-api.poltang.workers.dev/tenant/ - Ok @ 1/4/2023, 9:50:26 AM
+^C%                                                                                                   2023-01-04 9:51:19 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T08:29:08Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 9:56:49 AM
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 9:56:58 AM
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 9:56:58 AM
+  (log) TenantDurable()
+  (log) blockConcurrencyWhile()
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) TenantDurable:/tenant
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 9:57:07 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) TenantDurable:/tenant/accounts
+  (log) tenantId: 6397c202f3d8a77b799c4293
+  (log) Storage size: 3
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 9:57:07 AM
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 9:57:15 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) TenantDurable:/tenant/clients
+  (log) tenantId: 6397c202f3d8a77b799c4293
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 9:57:15 AM
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 9:57:21 AM
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 9:57:21 AM
+  (log) 2a09:bac1:34a0:18::19b:181
+  (log) TenantDurable:/tenant/projects
+  (log) tenantId: 6397c202f3d8a77b799c4293
+  (log) Storage size: 1
+2023-01-04 10:01:54 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T09:20:44Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 10:20:51 AM
+  (log) Hono:/modules
+GET https://aces-api.poltang.workers.dev/modules - Ok @ 1/4/2023, 10:20:51 AM
+  (log) blockConcurrencyWhile()
+  (log) DurableObject: fetch()
+  (log) AcesDurable:/modules
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 10:21:07 AM
+  (log) Hono:/tenant
+GET https://aces-api.poltang.workers.dev/tenant - Ok @ 1/4/2023, 10:21:07 AM
+  (log) TenantDurable()
+  (log) blockConcurrencyWhile()
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 10:21:35 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/accounts
+  (log) Storage size: 3
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 10:21:35 AM
+  (log) Hono:/tenant/accounts
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:21:56 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:21:56 AM
+  (log) Hono:/tenant/clients
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:22:06 AM
+  (log) Hono:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:22:06 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:22:11 AM
+  (log) Hono:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:22:11 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 10:22:53 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/accounts
+  (log) Storage size: 3
+GET https://aces-api.poltang.workers.dev/tenant/accounts - Ok @ 1/4/2023, 10:22:53 AM
+  (log) Hono:/tenant/accounts
+GET https://aces-api.poltang.workers.dev/tenant/accounts/6397c47ba009344a26c0db90 - Ok @ 1/4/2023, 10:23:00 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/accounts/6397c47ba009344a26c0db90
+GET https://aces-api.poltang.workers.dev/tenant/accounts/6397c47ba009344a26c0db90 - Ok @ 1/4/2023, 10:23:00 AM
+  (log) Hono:/tenant/accounts/6397c47ba009344a26c0db90
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 10:23:09 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/projects
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/projects - Ok @ 1/4/2023, 10:23:09 AM
+  (log) Hono:/tenant/projects
+GET https://aces-api.poltang.workers.dev/tenant/projects/63982fd581fcc61ce067ccc3 - Ok @ 1/4/2023, 10:23:16 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/projects/63982fd581fcc61ce067ccc3
+GET https://aces-api.poltang.workers.dev/tenant/projects/63982fd581fcc61ce067ccc3 - Ok @ 1/4/2023, 10:23:16 AM
+  (log) Hono:/tenant/projects/63982fd581fcc61ce067ccc3
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:23:23 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:23:23 AM
+  (log) Hono:/tenant/clients
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:23:32 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:23:32 AM
+  (log) Hono:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:24:15 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:24:15 AM
+  (log) Hono:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:24:19 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:24:19 AM
+  (log) Hono:/tenant/clients
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 10:26:36 AM
+  (log) Hono:/whoami
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:27:10 AM
+  (log) Hono:/tenant/clients
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:27:10 AM
+  (log) TenantDurable()
+  (log) blockConcurrencyWhile()
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:27:13 AM
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients
+  (log) Storage size: 1
+GET https://aces-api.poltang.workers.dev/tenant/clients - Ok @ 1/4/2023, 10:27:13 AM
+  (log) Hono:/tenant/clients
+GET https://aces-api.poltang.workers.dev/whoami - Ok @ 1/4/2023, 10:27:32 AM
+  (log) Hono:/whoami
+2023-01-04 10:32:05 aces-api > wrangler tail
+ ⛅️ wrangler 2.6.2
+-------------------
+▲ [WARNING] Processing wrangler.toml configuration:
+
+    - D1 Bindings are currently in alpha to allow the API to evolve before general availability.
+      Please report any issues to https://github.com/cloudflare/wrangler2/issues/new/choose
+      Note: set NO_D1_WARNING=true to hide this message
+
+
+▲ [WARNING] Beginning log collection requires restarting the Durable Objects associated with aces-api. Any WebSocket connections or other non-persisted state will be lost as part of this restart.
+
+
+Would you like to continue? (y/n)
+Successfully created tail, expires at 2023-01-04T09:39:52Z
+Connected to aces-api, waiting for logs...
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:39:58 AM
+  (log) TenantDurable()
+  (log) blockConcurrencyWhile()
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients/6397e13b601be4683fe46832
+  (log) client:6397e13b601be4683fe46832
+  (log) {
+  id: '6397e13b601be4683fe46832',
+  tenantId: '6397c202f3d8a77b799c4293',
+  created: '2022-12-13T02:19:39.731Z',
+  updated: '2022-12-13T02:19:39.731Z',
+  orgName: 'PT Mandiri Tunas Finance (Dahlia Prasetya Ningtyas)',
+  address1: 'Graha Mandiri Lt. 3A',
+  address2: 'Jl. Imam Bonjol No. 61',
+  city: 'Jakarta Pusat',
+  province: 'DKI Jakarta',
+  postcode: '10330',
+  phone: '(+62) 21 4435235',
+  email: 'hr@mtf.co.id',
+  website: 'https://www.mtf.co.id/',
+  orgType: 'Swasta',
+  bizTypes: [ 'Finance' ],
+  logo: '',
+  npwpNomor: '01.343.661.3-093.000',
+  npwpNama: 'PT Mandiri Tunas Finance',
+  npwpNIK: '',
+  npwpAlamat: 'Graha Mandiri Lt. 3A, Jl. Imam Bonjol No. 61',
+  npwpKelurahan: 'Menteng',
+  npwpKecamatan: 'Menteng',
+  npwpKota: 'Jakarta Pusat',
+  npwpProvinsi: 'DKI Jakarta',
+  contactName: 'Budi',
+  contactPhone: '087884939032',
+  contactEmail: 'budi@mtf.co.id'
+}
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:39:58 AM
+  (log) Hono:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:40:58 AM
+  (log) TenantDurable()
+  (log) blockConcurrencyWhile()
+  (log) DurableObject: fetch()
+  (log) TenantDurable:/tenant/clients/6397e13b601be4683fe46832
+GET https://aces-api.poltang.workers.dev/tenant/clients/6397e13b601be4683fe46832 - Ok @ 1/4/2023, 10:40:58 AM
+  (log) Hono:/tenant/clients/6397e13b601be4683fe46832
+2023-01-04 10:45:48 aces-api >
