@@ -66,18 +66,30 @@ export function prepareDBUpdate(table:string, id:string|number, data:any) {
 
 export async function allTables(db: D1Database) {
   const rs = await db.batch([
-    db.prepare("PRAGMA table_info(`tenants`)"),
+    db.prepare("PRAGMA table_info(`admins`)"),
     db.prepare("PRAGMA table_info(`users`)"),
+    db.prepare("PRAGMA table_info(`tenants`)"),
+    db.prepare("PRAGMA table_info(`members`)"),
     db.prepare("PRAGMA table_info(`clients`)"),
     db.prepare("PRAGMA table_info(`projects`)"),
+    db.prepare("PRAGMA table_info(`module_groups`)"),
     db.prepare("PRAGMA table_info(`modules`)"),
+    db.prepare("PRAGMA table_info(`project_modules`)"),
+    db.prepare("PRAGMA table_info(`accounts`)"),
+    db.prepare("PRAGMA table_info(`module_usages`)"),
   ])
 
   return [
-    { title: 'tenants', rows: rs[0].results as unknown as TableProps[] },
+    { title: 'admins', rows: rs[0].results as unknown as TableProps[] },
     { title: 'users', rows: rs[1].results as unknown as TableProps[] },
-    { title: 'clients', rows: rs[2].results as unknown as TableProps[] },
-    { title: 'projects', rows: rs[3].results as unknown as TableProps[] },
-    { title: 'modules', rows: rs[4].results as unknown as TableProps[] },
+    { title: 'tenants', rows: rs[2].results as unknown as TableProps[] },
+    { title: 'members', rows: rs[3].results as unknown as TableProps[] },
+    { title: 'clients', rows: rs[4].results as unknown as TableProps[] },
+    { title: 'projects', rows: rs[5].results as unknown as TableProps[] },
+    { title: 'module_groups', rows: rs[6].results as unknown as TableProps[] },
+    { title: 'modules', rows: rs[7].results as unknown as TableProps[] },
+    { title: 'project_modules', rows: rs[8].results as unknown as TableProps[] },
+    { title: 'accounts', rows: rs[9].results as unknown as TableProps[] },
+    { title: 'module_usages', rows: rs[10].results as unknown as TableProps[] },
   ];
 }

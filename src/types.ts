@@ -1,3 +1,6 @@
+import { LOGIN_TYPE_ACES, LOGIN_TYPE_TENANT } from "./env";
+import { Account } from "./store.types";
+
 export interface Credential {
   username: string;
   password: string;
@@ -12,35 +15,15 @@ export interface CredentialKV {
   };
 }
 
-export type RawAccount = {
-  id: string;
-  tenantId: string;
-  role: string;
-  status: string;
-  isDefault: boolean | number;
-  mcount: number;
-  username: string;
-  email: string;
-  fullname: string;
-  orgName: string;
-  expiryDate: string;
-}
+// const LoginType = LOGIN_TYPE_ACES || LOGIN_TYPE_TENANT
 
-export type TenantSessionUser = Omit<RawAccount, 'orgName' | 'expiryDate'> & {
-  tenantOrgName: string; // tenant.orgName
-  tenantExpDate: string; // tenant.expiryDate
-  loginType: 'tenant';
+export type TenantSessionUser = Account & {
+  loginType: 'aces' | 'tenant';
   ts: number;
 }
 
 type UpdateData = {
   [key: string]: string | string[] | number | boolean;
-}
-
-const x: UpdateData = {
-  'nama': 'jum',
-  asa: 9090,
-  tipe: ['s', 's'],
 }
 
 export type UpdateBody = {

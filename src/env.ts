@@ -1,3 +1,17 @@
+export const DBTables = [
+  "accounts",
+  "admins",
+  "clients",
+  "members",
+  "module_groups",
+  "module_usages",
+  "modules",
+  "project_modules",
+  "projects",
+  "tenants",
+  "users",
+];
+
 export const LOGIN_TYPE_ACES = 'aces'
 export const LOGIN_TYPE_TENANT = 'tenant'
 

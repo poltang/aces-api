@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/serve-static.module";
-import { Env, LOGIN_TYPE_TENANT } from "./env";
+import ObjectID from "bson-objectid";
+import { DBTables, Env, LOGIN_TYPE_TENANT } from "./env";
 import { allTables, logPath, objectify } from "./utils";
 import signinHTML from "./signin-html";
 import { authHandler } from "./auth";
@@ -8,24 +9,10 @@ import { getSessionUser } from "./session";
 import { Credential } from "./types";
 import SQLiteTable from "./SQLiteTable";
 // import { FormData, FormUpdate, FormContent, formScript } from "./form-update";
-import ObjectID from "bson-objectid";
 /* exports */
 export { AcesDurables } from "./AcesDurables";
 
 const ACES_DO_NAME = "aces-durables";
-const TABLES = [
-  "accounts",
-  "active_accounts",
-  "clients",
-  "members",
-  "module_groups",
-  "modules",
-  "project_modules",
-  "projects",
-  "tenants",
-  "used_modules",
-  "users",
-];
 
 const app = new Hono<{ Bindings: Env }>({ strict: true });
 
@@ -122,7 +109,7 @@ app.post("/signin", async (c) => {
 
 app.get("/pragma/:table", async (c) => {
   const table = c.req.param("table").replace("-", "_");
-  if (TABLES.includes(table)) {
+  if (DBTables.includes(table)) {
     const sql = `PRAGMA table_info('${table}')`;
     const rs = await c.env.DB.prepare(sql).all();
     return c.json(rs.results);
@@ -132,7 +119,7 @@ app.get("/pragma/:table", async (c) => {
 
 app.get("/data/:table", async (c) => {
   const table = c.req.param("table").replace("-", "_");
-  if (!TABLES.includes(table)) {
+  if (!DBTables.includes(table)) {
     return c.text("Page Not Found", 404);
   }
   const sql = `SELECT * FROM [${table}]`;
@@ -143,7 +130,7 @@ app.get("/data/:table", async (c) => {
 app.get("/data/:table/:id", async (c) => {
   const id = c.req.param("id");
   const table = c.req.param("table").replace("-", "_");
-  if (!TABLES.includes(table)) {
+  if (!DBTables.includes(table)) {
     return c.text("Page Not Found", 404);
   }
 

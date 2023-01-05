@@ -1,14 +1,15 @@
 import { sealData } from "iron-session/edge"
 import { decrypt } from "./crypto"
-import { RawAccount, TenantSessionUser } from "./types"
+import { Account } from "./store.types"
+import { TenantSessionUser } from "./types"
 
 export async function authHandler(c) {
   const {username, password} = await c.req.json() as unknown as any
 
   // 1. Find only default account
   // TODO: case if no row with isDefault=TRUE
-  const sql = `SELECT * FROM active_accounts WHERE status='active' AND isDefault=TRUE AND (email=? OR username=?)`
-  const found: RawAccount = await c.env.DB.prepare(sql).bind(username, username).first()
+  const sql = `SELECT * FROM accounts WHERE status='active' AND isDefault=TRUE AND (email=? OR username=?)`
+  const found: Account = await c.env.DB.prepare(sql).bind(username, username).first()
   if (!found) {
     return c.json({ message: 'Not Found'}, 404)
   }
@@ -51,16 +52,14 @@ export async function authHandler(c) {
 
   // 4. Verified...
   // https://stackoverflow.com/questions/23886484/elegant-way-to-code-partially-copy-objects-in-javascript#50965203
-  const { orgName, expiryDate, ...rest } = found
-  const partial = rest
+  // const { orgName, expiryDate, ...rest } = found
+  // const partial = rest
   const user: TenantSessionUser = { // SessionUser
-    ...partial,
     // TODO
     // Check accuracy of `isDefault`
-    isDefault: true, // found.isDefault == 1,
+    ...found,
+    isDefault: true,
     loginType: 'tenant',
-    tenantOrgName: found.orgName,
-    tenantExpDate: found.expiryDate,
     ts: new Date().getTime(),
   }
   console.log('TenantSessionUser', user);

@@ -3,6 +3,7 @@ export type Admin = {
   username: string;
   fullname: string;
   email: string;
+  secret: string;
   role: string;
   status: string;
   created: string;
@@ -21,22 +22,23 @@ export type Member = {
   tenantId: string;
   role: string;
   status: string;
+  isDefault: boolean;
   created: string;
   updated: string;
-  isDefault: boolean;
 }
 export type Account = {
   id: string;
   tenantId: string;
   role: string;
   status: string;
-  isDefault: boolean;
-  mcount: number;
+  isDefault: boolean | number;
+  mems: number;
+  amems: number;
   username: string;
   email: string;
   fullname: string;
-  orgName: string;
-  expiryDate: string;
+  tenantOrgName: string;
+  tenantExpDate: string;
 }
 export type Client = {
   id: string;
@@ -155,7 +157,7 @@ export type ProjectModule = {
   created: string;
   updated: string;
 }
-export type UsedModule = {
+export type ModuleUsage = {
   id: string;
   projectId: string;
   quota: number;
@@ -176,7 +178,7 @@ export const ModuleKeys = (`id,groupId,lang,level,minutes,method,title,descripti
 
 export const ModuleGroupKeys = (`id,name,descID,descEN,created,updated`).split(',')
 
-export const UsedModuleKeys = (`id,projectId,quota,groupId,lang,level,minutes,`
+export const ModuleUsageKeys = (`id,projectId,quota,groupId,lang,level,minutes,`
 + `method,title,description,price,created,updated`).split(',')
 
 export const AdminKeys = (`id,username,fullname,email,role,status,`
@@ -189,7 +191,7 @@ export const MemberKeys = (`id,tenantId,role,status,isDefault,`
 + `created,updated`).split(',')
 
 export const AccountKeys = (`id,tenantId,role,status,isDefault,mcount,username,email,`
-+ `fullname,orgName,expiryDate`).split(',')
++ `fullname,tenantOrgName,tenantExpDate`).split(',')
 
 export const ClientKeys = (`id,tenantId,created,updated,orgName,address1,address2,city,`
 + `province,postcode,phone,email,website,orgType,bizTypes,logo,npwpNomor,npwpNama,npwpNIK,`
@@ -207,6 +209,8 @@ export const ProjectKeys = (`id,tenantId,clientId,adminId,slug,created,updated,`
 +`acesInvoiceDate,reportLang,clientContractDate,clientInvoiceDate,contactName,`
 +`contactPhone,contactEmail`).split(',')
 
+export const ProjectModuleKeys =(`id,projectId,quota,created,updated`).split(',')
+
 type Typing = {
   prefix: string;
   asPath: string;
@@ -217,7 +221,7 @@ type Typing = {
 interface TypingType {
   MODULE: Typing;
   MODULEGROUP: Typing;
-  USEDMODULE: Typing;
+  MODULEUSAGE: Typing;
   PROJECTMODULE: Typing;
   ADMIN: Typing;
   USER: Typing;
@@ -229,16 +233,16 @@ interface TypingType {
 }
 
 export const Types: TypingType = {
-  MODULE:         { prefix:'module:',          asPath:'module',          tableName:'modules',          typeName:'Module',         keys:ModuleKeys },
-  MODULEGROUP:    { prefix:'modulegroup:',     asPath:'module-group',    tableName:'module_groups',    typeName:'ModuleGroup',    keys:ModuleGroupKeys },
-  USEDMODULE:     { prefix:'usedmodule:',      asPath:'used-module',     tableName:'used_modules',     typeName:'UsedModule',     keys:UsedModuleKeys },
-  PROJECTMODULE:  { prefix:'projectmodule:',   asPath:'project-module',  tableName:'project_modules',  typeName:'ProjectModule',  keys:[] },
-  ADMIN:          { prefix:'admin:',           asPath:'admin',           tableName:'admins',           typeName:'Admin',          keys:AdminKeys },
-  USER:           { prefix:'user:',            asPath:'user',            tableName:'users',            typeName:'User',           keys:UserKeys },
-  MEMBER:         { prefix:'member:',          asPath:'member',          tableName:'members',          typeName:'Member',         keys:MemberKeys },
-  ACCOUNT:        { prefix:'account:',         asPath:'account',         tableName:'accounts',         typeName:'Account',        keys:AccountKeys },
-  CLIENT:         { prefix:'client:',          asPath:'client',          tableName:'clients',          typeName:'Client',         keys:ClientKeys },
-  TENANT:         { prefix:'tenant:',          asPath:'tenant',          tableName:'tenants',          typeName:'Tenant',         keys:TenantKeys },
-  PROJECT:        { prefix:'project:',         asPath:'project',         tableName:'projects',         typeName:'Project',        keys:ProjectKeys },
+  ACCOUNT:        { prefix:'account:',         asPath:'accounts',         tableName:'accounts',         typeName:'Account',        keys:AccountKeys },
+  ADMIN:          { prefix:'admin:',           asPath:'admins',           tableName:'admins',           typeName:'Admin',          keys:AdminKeys },
+  CLIENT:         { prefix:'client:',          asPath:'clients',          tableName:'clients',          typeName:'Client',         keys:ClientKeys },
+  MEMBER:         { prefix:'member:',          asPath:'members',          tableName:'members',          typeName:'Member',         keys:MemberKeys },
+  MODULEGROUP:    { prefix:'modulegroup:',     asPath:'module-groups',    tableName:'module_groups',    typeName:'ModuleGroup',    keys:ModuleGroupKeys },
+  MODULEUSAGE:    { prefix:'moduleusage:',     asPath:'module-usages',    tableName:'module_usages',    typeName:'ModuleUsage',    keys:ModuleUsageKeys },
+  MODULE:         { prefix:'module:',          asPath:'modules',          tableName:'modules',          typeName:'Module',         keys:ModuleKeys },
+  PROJECTMODULE:  { prefix:'projectmodule:',   asPath:'project-modules',  tableName:'project_modules',  typeName:'ProjectModule',  keys:ProjectModuleKeys },
+  PROJECT:        { prefix:'project:',         asPath:'projects',         tableName:'projects',         typeName:'Project',        keys:ProjectKeys },
+  TENANT:         { prefix:'tenant:',          asPath:'tenants',          tableName:'tenants',          typeName:'Tenant',         keys:TenantKeys },
+  USER:           { prefix:'user:',            asPath:'users',            tableName:'users',            typeName:'User',           keys:UserKeys },
 }
 // Types.ACCOUNT.asPath

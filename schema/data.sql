@@ -1,3 +1,12 @@
+DELETE FROM modules;
+DELETE FROM module_groups;
+
+DELETE FROM projects;
+DELETE FROM clients;
+DELETE FROM members;
+DELETE FROM tenants;
+DELETE FROM users;
+
 INSERT INTO module_groups ([id],[name],[descID], [descEN], [created], [updated]) VALUES
 ('GPQ', 'GPQ', 'Deskripsi Bahasa Indonesia...', 'Deskripsi Bahasa Inggris...', '2022-12-22T10:28:06.085Z', '2022-12-22T10:28:06.085Z'),
 ('AIME', 'AIME', 'Deskripsi Bahasa Indonesia...', 'Deskripsi Bahasa Inggris...', '2022-12-22T10:28:06.085Z', '2022-12-22T10:28:06.085Z'),
@@ -52,6 +61,7 @@ INSERT INTO modules VALUES
 ('INTERVIEW-ID4', 'INTERVIEW', 'ID', 4, 120, 'assisted', 'Wawancara - Umum Level Manager', 'Module description...', 123456, '2022-12-22T10:13:24.564Z', '2022-12-22T10:13:24.564Z'),
 ('INTERVIEW-ID5', 'INTERVIEW', 'ID', 5, 120, 'assisted', 'Wawancara - Umum Level Senior Manager/GM', 'Module description...', 123456, '2022-12-22T10:13:24.564Z', '2022-12-22T10:13:24.564Z');
 
+
 INSERT INTO users VALUES
 ('6397c47ba009344a26c0db8e', '2022-12-13T02:25:27.661Z', '2022-12-13T02:25:27.661Z', 'nining', 'Nining Prasetya', 'nining@yahoo.com'),
 ('6397c47ba009344a26c0db8f', '2022-12-13T02:25:28.663Z', '2022-12-13T02:25:28.663Z', 'muhtar', 'Moch Muhtar', 'muhtar@gaiasol.com'),
@@ -66,13 +76,13 @@ INSERT INTO tenants VALUES
 ('6397c202f3d8a77b799c4293', '6397c47ba009344a26c0db90', '2022-12-13T02:17:40.020Z', '2022-12-13T02:17:40.020Z', '2023-12-13T02:17:40.020Z', 'PT Gaia Solutions', 'Gaia', 'partner', 'pro', '', 'Jl. Raya Poltangan No 17', 'Tanjung Barat, Jagakarsa', 'Jakarta Selatan', 'DKI', '12530', '(021) 29321691', 'gaia@gaiasol.com', 'gaiasol.com', 'Jasa', '["Lainnya"]', '', '02.205.693.1-542.000', 'PT GAIA SOLUTIONS', '', 'Jl. Raya Poltangan No 1', 'Tanjung Barat', 'Jagakarsa', 'Jakarta Selatan', 'DKI Jakarta', 'Muhtar', '081288493324', 'muhtar@gaiasol.com', 'Muhtar', '081288493324', 'muhtar@gaiasol.com');
 
 INSERT INTO members VALUES
-('6397c47ba009344a26c0db8e', '6397c202f3d8a77b799c4291', '', 'active', '2022-12-13T02:28:57.341Z', '2022-12-13T02:28:57.341Z', TRUE),
-('6397c47ba009344a26c0db8f', '6397c202f3d8a77b799c4292', '', 'active', '2022-12-13T02:28:58.281Z', '2022-12-13T02:28:58.281Z', TRUE),
-('6397c47ba009344a26c0db90', '6397c202f3d8a77b799c4293', '', 'active', '2022-12-13T02:28:59.188Z', '2022-12-13T02:28:59.188Z', TRUE),
-('6397c47ba009344a26c0db91', '6397c202f3d8a77b799c4291', '', 'active', '2022-12-13T02:29:00.193Z', '2022-12-13T02:29:00.193Z', TRUE),
-('6397c47ba009344a26c0db92', '6397c202f3d8a77b799c4293', '', 'active', '2022-12-13T02:29:00.921Z', '2022-12-13T02:29:00.921Z', TRUE),
-('6397c47ba009344a26c0db93', '6397c202f3d8a77b799c4291', '', 'active', '2022-12-13T02:29:01.617Z', '2022-12-13T02:29:01.617Z', TRUE),
-('6397c47ba009344a26c0db93', '6397c202f3d8a77b799c4293', '', 'active', '2022-12-13T02:29:01.617Z', '2022-12-13T02:29:01.617Z', FALSE);
+('6397c47ba009344a26c0db8e', '6397c202f3d8a77b799c4291', '', 'active', TRUE, '2022-12-13T02:28:57.341Z', '2022-12-13T02:28:57.341Z'),
+('6397c47ba009344a26c0db8f', '6397c202f3d8a77b799c4292', '', 'active', TRUE, '2022-12-13T02:28:58.281Z', '2022-12-13T02:28:58.281Z'),
+('6397c47ba009344a26c0db90', '6397c202f3d8a77b799c4293', '', 'active', TRUE, '2022-12-13T02:28:59.188Z', '2022-12-13T02:28:59.188Z'),
+('6397c47ba009344a26c0db91', '6397c202f3d8a77b799c4291', '', 'active', TRUE, '2022-12-13T02:29:00.193Z', '2022-12-13T02:29:00.193Z'),
+('6397c47ba009344a26c0db92', '6397c202f3d8a77b799c4293', '', 'active', TRUE, '2022-12-13T02:29:00.921Z', '2022-12-13T02:29:00.921Z'),
+('6397c47ba009344a26c0db93', '6397c202f3d8a77b799c4291', '', 'active', TRUE, '2022-12-13T02:29:01.617Z', '2022-12-13T02:29:01.617Z'),
+('6397c47ba009344a26c0db93', '6397c202f3d8a77b799c4293', '', 'active', FALSE, '2022-12-13T02:29:01.617Z', '2022-12-13T02:29:01.617Z');
 
 INSERT INTO clients VALUES
 ('6397e13b601be4683fe46831', '6397c202f3d8a77b799c4292', '2022-12-13T02:19:39.203Z', '2022-12-13T02:19:39.203Z', 'PT Krakatau Steel (Persero) Tbk (Dahlia Prasetya Ningtyass)', 'Jalan Industri No. 5', 'Kel. Ramanuju Kec. Purwakarta', 'Cilegon', 'Banten', '42431', '(+62) 254 392159', 'corsec@krakatausteel.com', 'https://www.krakatausteel.com/', 'BUMN', '["Manufaktur"]', '', '01.000.054.5-051.000', 'PT Krakatau Steel (Persero) Tbk', '', 'Jalan Industri No. 5', 'Ramanuju', 'Purwakarta', 'Cilegon', 'Banten', 'Dodi', '0821029112484', 'dodi@krakatausteel.com'),
