@@ -6,6 +6,9 @@
     "types": [
       "jest",
       "@cloudflare/workers-types"
-    ]
+    ],
+    "jsx": "react-jsx",
+    "jsxFragmentFactory": "Fragment",
+    "jsxImportSource": "hono/jsx"
   }
 }

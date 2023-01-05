@@ -10,6 +10,9 @@ kv_namespaces = [
 [site]
 bucket = "./assets"
 
+# [build]
+# command = "yarn build"
+
 [vars]
 COOKIE_NAME = "aces-auth"
 COOKIE_PASSWORD = "PJhb_GceyJ0-c0db97eXAiOiJ-KV1Q-LiOiJIU/zI1NiJ9=" # should be secrets

@@ -47,3 +47,12 @@ export type UpdateBody = {
   id: string;
   data: UpdateData;
 }
+
+export type TableProps = {
+  cid: number;
+  name: string;
+  type: string;
+  notnull: number;
+  dflt_value: string;
+  pk: number;
+};
