@@ -4,6 +4,7 @@ import { D1Database } from "./d1_beta";
 import { getSessionUser } from "./session";
 import {
   buildUpdater,
+  getLoginType,
   logPath,
   objectify,
   prepareDBUpdate,
@@ -277,9 +278,9 @@ export class AcesDurables {
       }
 
       const user: any = await getSessionUser(c.req, env);
-      if (user.loginType != LOGIN_TYPE_TENANT) {
-        return c.text("Unauthorized", 401);
-      }
+      // if (user.loginType != LOGIN_TYPE_TENANT) {
+      //   return c.text("Unauthorized", 401);
+      // }
 
       const tenantId = user.tenantId;
       console.log("tenantId", tenantId);
@@ -337,6 +338,7 @@ export class AcesDurables {
       const tableName =
         infoOrTenantPath == "info" ? "tenants" : infoOrTenantPath;
       const { id, data } = (await c.req.json()) as unknown as UpdateBody;
+      console.log("id", id);
       console.log("data", data);
 
       // If tableName is 'tenants', the `id` must match `user.tenantId`
@@ -351,6 +353,7 @@ export class AcesDurables {
         }
 
         const key = `${TENANT_PREFIX}${id}`;
+        console.log("key", key);
         const item = await this.storage.get(key);
         if (!item) {
           return objectNotFound(c);
@@ -369,7 +372,11 @@ export class AcesDurables {
 
       // Table = accounts / client / member / project
       // Key = [type]:[tenantId]:[id]
-      const key = `${PREFIX[singular(tableName)]}${user.tenantId}:${id}`;
+      // const key = `${PREFIX[singular(tableName)]}${user.tenantId}:${id}`;
+      const key = `${
+        PREFIX[singular(tableName)]
+      }6397c202f3d8a77b799c4292:${id}`;
+      console.log("key", key);
       const item = await this.storage.get(key);
       if (!item) {
         return objectNotFound(c);
@@ -394,6 +401,8 @@ export class AcesDurables {
 
     this.app.post("/api/tenant/create", async (c) => {
       const user: any = await getSessionUser(c.req, env);
+      const loginType = await getLoginType(c);
+      console.log(loginType);
       if (user.loginType != LOGIN_TYPE_TENANT) {
         return c.text("Unauthorized", 401);
       }

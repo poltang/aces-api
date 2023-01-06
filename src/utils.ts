@@ -1,4 +1,6 @@
 import { Context } from "hono"
+import { ACES_DO_NAME } from "./env";
+import { getSessionUser } from "./session";
 import { TableProps } from "./types"
 
 export function pageNotFound(c: Context) {
@@ -8,6 +10,21 @@ export function pageNotFound(c: Context) {
 export function objectNotFound(c: Context) {
   return c.json({ info: 'Object Not Found'}, 404)
 }
+
+export function unauthorized(c: Context) {
+  return c.text("Unauthorized", 401);
+}
+
+export const fetchAcesDurable = async (c) => {
+  const id = c.env.ACES_DO.idFromName(ACES_DO_NAME);
+  const stub = c.env.ACES_DO.get(id);
+  return await stub.fetch(c.req);
+};
+
+export const getLoginType = async (c) => {
+  const user: any = await getSessionUser(c.req, c.env);
+  return user && user.loginType ? user.loginType : null;
+};
 
 export function objectify(thing: any) {
   if (Array.isArray(thing)) {

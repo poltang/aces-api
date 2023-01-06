@@ -2,10 +2,9 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/serve-static.module";
 import { Env, LOGIN_TYPE_TENANT } from "./env";
-import { logPath } from "./utils";
+import { fetchAcesDurable, getLoginType, logPath, unauthorized } from "./utils";
 import signinHTML from "./signin-html";
 import { authHandler } from "./auth";
-import { getSessionUser } from "./session";
 import { Credential } from "./types";
 import {
   adminKV,
@@ -19,11 +18,10 @@ import {
   whoami,
 } from "./dev-routes";
 import { AsPaths, Prefixes, Singulars, TableNames } from "./store.types";
+import { getSessionUser } from "./session";
 
 /* exports */
 export { AcesDurables } from "./AcesDurables";
-
-const ACES_DO_NAME = "aces-durables";
 
 const app = new Hono<{ Bindings: Env }>({ strict: true });
 
@@ -66,51 +64,31 @@ app.get("/pragma/:table", async (c) => pragma(c));
 app.get("/data/:table", async (c) => table(c));
 app.get("/data/:table/:id", async (c) => tableWithId(c));
 
-/* AcesDurables */
+/* Middleware: aces or tenant */
+app.use("/api/:tenantOrAces/*", async (c, next) => {
+  const path = c.req.param("tenantOrAces");
+  const loginType = await getLoginType(c);
+  if (path == LOGIN_TYPE_TENANT && loginType != LOGIN_TYPE_TENANT) {
+    return unauthorized(c);
+  }
+  if (path != LOGIN_TYPE_TENANT && loginType == LOGIN_TYPE_TENANT) {
+    return unauthorized(c);
+  }
+  await next();
+});
+
+/* Middleware: aces & tenat */
+app.use("/jsx", async (c, next) => {
+  const user = await getSessionUser(c.req, c.env);
+  if (!user) return unauthorized(c);
+  await next();
+});
 
 // TES FORM UPDATE
-app.get("/jsx", async (c) => {
-  const user: any = await getSessionUser(c.req, c.env);
-  if (!user || user.loginType != LOGIN_TYPE_TENANT) {
-    return c.text("Unauthorized", 401);
-  }
+app.get("/jsx", async (c) => fetchAcesDurable(c));
+// app.post("/jsx", async (c) => fetchAcesDurable(c));
 
-  const id = c.env.ACES_DO.idFromName(ACES_DO_NAME);
-  const stub = c.env.ACES_DO.get(id);
-  return await stub.fetch(c.req);
-});
-
-app.post("/jsx", async (c) => {
-  const user: any = await getSessionUser(c.req, c.env);
-  if (!user || user.loginType != LOGIN_TYPE_TENANT) {
-    return c.text("Unauthorized", 401);
-  }
-
-  const id = c.env.ACES_DO.idFromName(ACES_DO_NAME);
-  const stub = c.env.ACES_DO.get(id);
-  return await stub.fetch(c.req);
-});
-
-app.get("/api/*", async (c) => {
-  const user: any = await getSessionUser(c.req, c.env);
-  if (!user) {
-    return c.text("Unauthorized", 401);
-  }
-
-  const id = c.env.ACES_DO.idFromName(ACES_DO_NAME);
-  const stub = c.env.ACES_DO.get(id);
-  return await stub.fetch(c.req);
-});
-
-app.post("/api/*", async (c) => {
-  const user: any = await getSessionUser(c.req, c.env);
-  if (!user) {
-    return c.text("Unauthorized", 401);
-  }
-
-  const id = c.env.ACES_DO.idFromName(ACES_DO_NAME);
-  const stub = c.env.ACES_DO.get(id);
-  return await stub.fetch(c.req);
-});
+app.get("/api/*", async (c) => fetchAcesDurable(c));
+app.post("/api/*", async (c) => fetchAcesDurable(c));
 
 export default app;
