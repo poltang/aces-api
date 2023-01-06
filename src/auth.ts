@@ -1,6 +1,5 @@
 import { sealData } from "iron-session/edge"
 import { decrypt } from "./crypto"
-import { Account } from "./store.types"
 import { AcesSessionUser, TenantSessionUser } from "./session"
 import { objectNotFound } from "./utils"
 import { ADMIN_KV_PREFIX, CRED_KV_PREFIX, LOGIN_TYPE_TENANT } from "./env"
@@ -18,10 +17,11 @@ export async function authHandler(c) {
   const found = await c.env.DB.prepare(stmt)
     .bind(username, username).first()
 
+  console.log('FOUND', found)
   if (!found) return objectNotFound(c)
 
   const key = type == LOGIN_TYPE_TENANT
-    ? `${CRED_KV_PREFIX}:${found.id}`
+    ? `${CRED_KV_PREFIX}${found.id}`
     : `${ADMIN_KV_PREFIX}${found.id}`
 
   const data = await c.env.KV.getWithMetadata(key) //as unknown as CredentialKV
