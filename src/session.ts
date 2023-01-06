@@ -1,5 +1,23 @@
 import { unsealData } from "iron-session/edge";
 import { Env } from "./env";
+import { Account, Admin } from "./store.types";
+
+// export type AcesSessionUser = Omit<Admin, 'secret' | 'created' | 'updated'> & {
+export type AcesSessionUser = {
+  id: string;
+  loginType: 'aces' | 'tenant';
+  fullname: string;
+  username: string;
+  email: string;
+  role: string;
+  status: string;
+  ts: number;
+}
+
+export type TenantSessionUser = Account & {
+  loginType: 'aces' | 'tenant';
+  ts: number;
+}
 
 export async function getSessionUser(req: Request, env: Env) {
   // First-party (hono) coookie: if exists, cookie starts with "aces-auth="

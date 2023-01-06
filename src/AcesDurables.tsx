@@ -1,6 +1,4 @@
 import { Hono } from "hono";
-import { decrypt } from "./crypto";
-import { sealData } from "iron-session/edge";
 import { Env, LOGIN_TYPE_ACES, LOGIN_TYPE_TENANT } from "./env";
 import { D1Database } from "./d1_beta";
 import { getSessionUser } from "./session";
@@ -11,35 +9,42 @@ import {
   prepareDBUpdate,
   remove_duplicates_es6,
 } from "./utils";
-import { TenantSessionUser, UpdateBody } from "./types";
-import { FormContent, FormData, FormUpdate, formScript } from "./form-update";
+import { UpdateBody } from "./types";
+import { FormContent, FormUpdate, formScript } from "./form-update";
 import ObjectID from "bson-objectid";
-import { newClientData, newProjectData, newUserData } from "./templates";
 import { ClientOrProjectOrTenant, prepareNewItem } from "./store";
-import { Client, Project, Tenant } from "./store.types";
+import { Client, Prefixes, Project, TableNames, Tenant } from "./store.types";
+import { pageNotFound, objectNotFound } from "./utils";
 
 const KEYS = `KEYS`;
-const ADMIN_PREFIX = "admin:";
-const ACCOUNT_PREFIX = "account:";
-const PROJECT_PREFIX = "project:";
-const CLIENT_PREFIX = "client:";
-const MEMBER_PREFIX = "member:";
-const TENANT_PREFIX = "tenant:";
-const USER_PREFIX = "user:";
-const MODULE_PREFIX = "module:";
-const MODULE_GROUP_PREFIX = "module-group:";
 
-const prefixes = {
-  accounts: ACCOUNT_PREFIX,
-  admins: ADMIN_PREFIX,
-  projects: PROJECT_PREFIX,
-  clients: CLIENT_PREFIX,
-  members: MEMBER_PREFIX,
-  tenants: TENANT_PREFIX,
-  users: USER_PREFIX,
-  modules: MODULE_PREFIX,
-  module_groups: MODULE_GROUP_PREFIX,
+const ACCOUNT_PREFIX = Prefixes[0];
+const ADMIN_PREFIX = Prefixes[1];
+const CLIENT_PREFIX = Prefixes[2];
+const MEMBER_PREFIX = Prefixes[3];
+const MODULEGROUP_PREFIX = Prefixes[4];
+const MODULEUSAGE_PREFIX = Prefixes[5];
+const MODULE_PREFIX = Prefixes[6];
+const PROJECTMODULE_PREFIX = Prefixes[7];
+const PROJECT_PREFIX = Prefixes[8];
+const TENANT_PREFIX = Prefixes[9];
+const USER_PREFIX = Prefixes[10];
+
+const PREFIX = {
+  // Key is singular mode of table name sans underscore
+  account: ACCOUNT_PREFIX,
+  admin: ADMIN_PREFIX,
+  client: CLIENT_PREFIX,
+  member: MEMBER_PREFIX,
+  modulegroup: MODULEGROUP_PREFIX,
+  moduleusage: MODULEUSAGE_PREFIX,
+  module: MODULE_PREFIX,
+  projectmodule: PROJECTMODULE_PREFIX,
+  project: PROJECT_PREFIX,
+  tenant: TENANT_PREFIX,
+  user: USER_PREFIX,
 };
+
 const ACES_PATHS = [
   "accounts",
   "projects",
@@ -50,28 +55,36 @@ const ACES_PATHS = [
 ];
 const TENANT_PATHS = ["clients", "projects", "accounts", "members"];
 
+function singular(tableName: string) {
+  if (!TableNames.includes(tableName)) throw new Error("Invalid table name");
+  return tableName.substring(0, tableName.length - 1).replace("_", "");
+}
+
 export class AcesDurables {
   app = new Hono({ strict: false });
   state: DurableObjectState;
   storage: DurableObjectStorage;
   keys: string[] = [];
 
-  loadFromDB = async (env: Env, tableSrc: string, force = false) => {
-    if (!Object.keys(prefixes).includes(tableSrc)) return;
+  loadFromDB = async (env: Env, tableName: string, force = false) => {
+    // if (!Object.keys(prefixes).includes(tableName)) return;
+    if (!TableNames.includes(tableName)) return;
 
-    const list = await this.storage.list({ prefix: prefixes[tableSrc] });
+    const list = await this.storage.list({
+      prefix: PREFIX[singular(tableName)],
+    });
     if (list.size == 0 || force) {
-      console.log(`Load ${tableSrc} from D1...`);
+      console.log(`Load ${tableName} from D1...`);
       const entries = {};
       const keys = [];
-      const rs = await env.DB.prepare(`SELECT * FROM ${tableSrc}`).all();
+      const rs = await env.DB.prepare(`SELECT * FROM ${tableName}`).all();
       rs.results.forEach(async (row: any) => {
         const tenantId = row.tenantId || false;
         // If table has column `tenantId`,
         // use `tenantId` as additional prefix
         let key = tenantId
-          ? prefixes[tableSrc] + `${tenantId}:${row.id}`
-          : prefixes[tableSrc] + `${row.id}`;
+          ? PREFIX[singular(tableName)] + `${tenantId}:${row.id}`
+          : PREFIX[singular(tableName)] + `${row.id}`;
         entries[key] = objectify(row);
         keys.push(key);
       });
@@ -188,59 +201,6 @@ export class AcesDurables {
       await next();
     });
 
-    // Admin signin handler
-    this.app.post("/signin", async (c) => {
-      const { username, password } = (await c.req.json()) as unknown as any;
-
-      // 1 Check db
-      const sql = `SELECT * FROM admins
-      WHERE status='active' AND (email=? OR username=?)`;
-      const found = (await env.DB.prepare(sql)
-        .bind(username, username)
-        .first()) as unknown as any;
-      if (!found) {
-        console.log("NOT FOUND IN DB");
-        return c.json({ message: "Not Found" }, 404);
-      }
-      console.log("found", found);
-
-      // 2. Check storage
-      const data: any = await this.storage.get(`${ADMIN_PREFIX}${found.id}`);
-      console.log("data", data);
-      const secret = data.secret;
-      if (password != (await decrypt(secret))) {
-        return c.json({ message: "Error username or password" }, 401);
-      }
-
-      const user = {
-        id: data.id,
-        loginType: "aces",
-        fullname: data.fullname,
-        username: data.username,
-        email: data.email,
-        role: data.role,
-        status: data.status,
-        ts: new Date().getTime(),
-      };
-      console.log("user:", user);
-
-      const sealedData = await sealData(user, {
-        password: env.COOKIE_PASSWORD,
-      });
-      console.log("sealedData:", sealedData);
-
-      /* Create headers and set cookie for direct client
-      ================================================== */
-      c.header("X-Message", "Hello!");
-      c.header("Content-Type", "application/json");
-      c.cookie(env.COOKIE_NAME, sealedData);
-      c.status(200);
-
-      /* Return user and cookie data that can be reused by client
-      =========================================================== */
-      return c.json({ user, cookie: sealedData });
-    });
-
     /* ==== KEYS ================== */
 
     this.app.get("/api/keys", async (c) => {
@@ -264,21 +224,17 @@ export class AcesDurables {
     */
 
     this.app.get("/api/modules", async (c) => {
-      // console.log(this.keys, this.keys.length);
-
       const url = new URL(c.req.url);
       const group = url.searchParams.get("group");
       const method = url.searchParams.get("method");
 
-      const list = await this.storage.list({ prefix: MODULE_PREFIX });
-      const array = Array.from(list).map(([, value]) => value);
-      const groupList = await this.storage.list({
-        prefix: MODULE_GROUP_PREFIX,
-      });
+      const moduleList = await this.storage.list({ prefix: MODULE_PREFIX });
+      const moduleArray = Array.from(moduleList).map(([, value]) => value);
+      const groupList = await this.storage.list({ prefix: MODULEGROUP_PREFIX });
       const groupArray = Array.from(groupList).map(([, value]) => value);
 
       if (group) {
-        const modules = array.filter(
+        const modules = moduleArray.filter(
           (m: any) => m.groupId.toLowerCase() == group.toLowerCase()
         );
         const ids = modules.map((m: any) => m.groupId);
@@ -286,14 +242,14 @@ export class AcesDurables {
         return c.json({ modules, groups });
       }
       if (method) {
-        const modules = array.filter(
+        const modules = moduleArray.filter(
           (m: any) => m.method.toLowerCase() == method.toLowerCase()
         );
         const ids = modules.map((m: any) => m.groupId);
         const groups = groupArray.filter((g: any) => ids.includes(g.id));
         return c.json({ modules, groups });
       }
-      return c.json({ modules: array, groups: groupArray });
+      return c.json({ modules: moduleArray, groups: groupArray });
     });
 
     /*
@@ -313,12 +269,11 @@ export class AcesDurables {
     /*     /api/tenant/accounts ----------- */
     /*     /api/tenant/members  ----------- */
 
-    this.app.get("/api/tenant/:what", async (c) => {
+    this.app.get("/api/tenant/:infoOrTenantPath", async (c) => {
       const paths = [...TENANT_PATHS, "info"];
-      const what = c.req.param("what");
-      console.log("what", what);
-      if (!paths.includes(what)) {
-        return c.text("404 Not Found", 404);
+      const infoOrTenantPath = c.req.param("infoOrTenantPath");
+      if (!paths.includes(infoOrTenantPath)) {
+        return pageNotFound(c);
       }
 
       const user: any = await getSessionUser(c.req, env);
@@ -328,22 +283,23 @@ export class AcesDurables {
 
       const tenantId = user.tenantId;
       console.log("tenantId", tenantId);
-      if (what == "info") {
+      if (infoOrTenantPath == "info") {
         const tenant = await this.storage.get(`${TENANT_PREFIX}${tenantId}`);
-        return tenant ? c.json(tenant) : c.json({ message: "Not Found" }, 404);
+        return tenant ? c.json(tenant) : pageNotFound(c);
       }
 
-      const prefix = `${prefixes[what]}${tenantId}`;
+      // Param "info" never comes to this point
+      const prefix = `${PREFIX[singular(infoOrTenantPath)]}${tenantId}`;
       const list = await this.storage.list({ prefix: prefix });
       const array = Array.from(list).map(([, value]) => value);
       return c.json(array);
     });
 
-    this.app.get("/api/tenant/:what/:id", async (c) => {
-      const what = c.req.param("what");
-      console.log("what", what);
-      if (!TENANT_PATHS.includes(what)) {
-        return c.text("404 Not Found", 404);
+    this.app.get("/api/tenant/:tenantPath/:id", async (c) => {
+      const tenantPath = c.req.param("tenantPath");
+      console.log("tenantPath", tenantPath);
+      if (!TENANT_PATHS.includes(tenantPath)) {
+        return pageNotFound(c);
       }
 
       const user: any = await getSessionUser(c.req, env);
@@ -353,46 +309,24 @@ export class AcesDurables {
 
       const id = c.req.param("id");
       const tenantId = user.tenantId;
-      const key = `${prefixes[what]}${tenantId}:${id}`;
+      const key = `${PREFIX[singular(tenantPath)]}${tenantId}:${id}`;
       console.log(key);
       const item = await this.storage.get(key);
       if (!item) {
-        return c.json({ message: "Not Found" }, 404);
+        return objectNotFound(c);
       }
       return c.json(item);
     });
 
-    // TESTING: UPDATE FORM
-    this.app.get("/jsx", async (c) => {
-      const user: any = await getSessionUser(c.req, env);
-      const key = `${CLIENT_PREFIX}${user.tenantId}:6397e13b601be4683fe46832`;
-      const client: any = await this.storage.get(key);
-      const tenant: any = await this.storage.get(
-        `${TENANT_PREFIX}${user.tenantId}`
-      );
-      const data = {
-        id: client.id,
-        npwpNomor: client.npwpNomor,
-        npwpNama: client.npwpNama,
-        npwpAlamat: client.npwpAlamat,
-        npwpKota: client.npwpKota,
-      };
-      return c.html(
-        <FormUpdate>
-          <FormContent data={data} />
-          {formScript}
-        </FormUpdate>
-      );
-    });
-
     /* === TENANT UPDATE HANDLERS ============ */
 
-    this.app.post("/api/tenant/:what", async (c) => {
+    this.app.post("/api/tenant/:infoOrTenantPath", async (c) => {
       const paths = [...TENANT_PATHS, "info"];
-      const what = c.req.param("what");
-      console.log("what", what);
-      if (!paths.includes(what)) {
-        return c.text("404 Not Found", 404);
+      const infoOrTenantPath = c.req.param("infoOrTenantPath");
+      console.log("infoOrTenantPath", infoOrTenantPath);
+
+      if (!paths.includes(infoOrTenantPath)) {
+        return pageNotFound(c);
       }
 
       const user: any = await getSessionUser(c.req, env);
@@ -400,12 +334,13 @@ export class AcesDurables {
         return c.text("Unauthorized", 401);
       }
 
-      const table = what == "info" ? "tenants" : what;
+      const tableName =
+        infoOrTenantPath == "info" ? "tenants" : infoOrTenantPath;
       const { id, data } = (await c.req.json()) as unknown as UpdateBody;
       console.log("data", data);
 
-      // If table is 'tenants', the `id` must match `user.tenantId`
-      if (table == "tenants") {
+      // If tableName is 'tenants', the `id` must match `user.tenantId`
+      if (tableName == "tenants") {
         if (id != user.tenantId) {
           return c.json(
             {
@@ -418,32 +353,36 @@ export class AcesDurables {
         const key = `${TENANT_PREFIX}${id}`;
         const item = await this.storage.get(key);
         if (!item) {
-          return c.json(
-            {
-              info: "Could not find the item to be updated",
-            },
-            400
-          );
+          return objectNotFound(c);
         }
 
-        const updatedObject = this.updateItem(env, table, id, key, item, data);
+        const updatedObject = this.updateItem(
+          env,
+          tableName,
+          id,
+          key,
+          item,
+          data
+        );
         return c.json(updatedObject);
       }
 
       // Table = accounts / client / member / project
       // Key = [type]:[tenantId]:[id]
-      const key = `${prefixes[table]}${user.tenantId}:${id}`;
+      const key = `${PREFIX[singular(tableName)]}${user.tenantId}:${id}`;
       const item = await this.storage.get(key);
       if (!item) {
-        return c.json(
-          {
-            info: "Could not find the item to be updated",
-          },
-          400
-        );
+        return objectNotFound(c);
       }
 
-      const updatedObject = this.updateItem(env, table, id, key, item, data);
+      const updatedObject = this.updateItem(
+        env,
+        tableName,
+        id,
+        key,
+        item,
+        data
+      );
       return c.json(updatedObject);
     });
 
@@ -451,8 +390,6 @@ export class AcesDurables {
     /* === TENANT CREATE HANDLERS ============ */
     /* --------------------------------------- */
     /*    type: client / project / user
-    /*    data:
-    /*
     /* --------------------------------------- */
 
     this.app.post("/api/tenant/create", async (c) => {
@@ -491,19 +428,12 @@ export class AcesDurables {
     /*
     Aces GET handlers
     ================= */
-    // /api/accounts?tid=xxx
-    // /api/projects?tid=xxx
-    // /api/clients?tid=xxx
-    // /api/members?tid=xxx
-    // /api/tenants?tid=xxx
-    // /api/users?tid=xxx
-    //
 
-    this.app.get("/api/:subject", async (c) => {
-      const subject = c.req.param("subject");
+    this.app.get("/api/:tableName", async (c) => {
+      const tableName = c.req.param("tableName");
 
-      if (!ACES_PATHS.includes(subject)) {
-        return c.text("404 Not Found", 404);
+      if (!ACES_PATHS.includes(tableName)) {
+        return pageNotFound(c);
       }
 
       const user: any = await getSessionUser(c.req, env);
@@ -515,77 +445,65 @@ export class AcesDurables {
       const tid = url.searchParams.get("tid");
       console.log("tid:", tid);
 
-      let prefix = prefixes[subject];
+      let prefix = PREFIX[singular(tableName)];
+
+      // None TID
       if (tid !== null) {
         prefix = `${prefix}${tid}`;
         console.log("prefix:", prefix);
-        if (subject == "tenants") {
+        if (tableName == "tenants") {
           const tenant = await this.storage.get(prefix);
           return tenant
             ? c.json(tenant)
             : c.json({ message: "Not Found" }, 404);
         } else {
-          prefix = subject == "users" ? prefixes[subject] : prefix;
+          // No tenantId in users
+          prefix = tableName == "users" ? PREFIX[singular(tableName)] : prefix;
           const list = await this.storage.list({ prefix: prefix });
           const array = Array.from(list).map(([, value]) => value);
           return c.json(array);
         }
       }
 
+      // With TID
       console.log("prefix:", prefix);
       const list = await this.storage.list({ prefix: prefix });
       const array = Array.from(list).map(([, value]) => value);
       return c.json(array);
     });
 
-    this.app.get("/api/:subject/:id", async (c) => {
-      const { subject, id } = c.req.param();
-      if (!ACES_PATHS.includes(subject)) {
-        return c.text("404 Not Found", 404);
+    this.app.get("/api/:tableName/:id", async (c) => {
+      const { tableName, id } = c.req.param();
+      if (!ACES_PATHS.includes(tableName)) {
+        return pageNotFound(c);
       }
 
-      if (subject == "tenants" || subject == "users") {
-        const key = prefixes[subject] + id;
-        console.log("key:", key);
+      // For tenants and users
+      if (tableName == "tenants" || tableName == "users") {
+        const key = PREFIX[singular(tableName)] + id;
         const item = await this.storage.get(key);
-        console.log("item:", item);
-        if (item == undefined) return c.json({ message: "Not Found" }, 404);
+        if (item == undefined) return objectNotFound(c);
         return c.json(item);
       }
 
-      /*
-      const list = await this.storage.list({ prefix: prefixes[subject] })
-      let found
-      list.forEach((item: any) => {
-        if (found == undefined) {
-          console.log('FOREACH')
-          if (item.id == id) {
-            found = item
-          }
-        }
-      })
-
-      if (found == undefined) {
-        return c.json({ message: 'Not Found' }, 404)
-      }
-      return c.json(found)
-      //*/
-
-      const prefix = prefixes[subject];
+      // Other than tenants and users
+      const prefix = PREFIX[singular(tableName)];
       console.log(prefix + id);
+      // Using KEYS
       const storedKeys: string[] = await this.storage.get(KEYS);
       const filter = storedKeys.filter(
         (t) => t.startsWith(prefix) && t.endsWith(id)
       );
       console.log(filter);
 
+      // filter.length should be 1 or 0
       if (filter.length) {
         const found = await this.storage.get(filter[0]);
         if (found) {
           return c.json(found);
         }
       }
-      return c.json({ message: "Not Found" }, 404);
+      return objectNotFound(c);
     });
 
     /* Create tenant, user/member/account
@@ -596,11 +514,32 @@ export class AcesDurables {
       const { type, data } = (await c.req.json()) as unknown as any;
     });
 
-    /*
-    this.app.get(`${BASE_PATH}`, async (c) => {
-      console.log('TenantDurable()')
-      return c.json({message: 'TENANT_DURABLE'})
-    })
-    */
+    // TESTING: FORM UPDATE CLIENT (first client)
+    // POST /api/tenant/clients
+    this.app.get("/jsx", async (c) => {
+      const user: any = await getSessionUser(c.req, env);
+      const keys: string[] = await this.storage.get(KEYS);
+      const filtered = keys.filter((k) => k.startsWith(CLIENT_PREFIX));
+      const key = filtered[0];
+      const client: any = await this.storage.get(key);
+      const tenant: any = await this.storage.get(
+        `${TENANT_PREFIX}${user.tenantId}`
+      );
+
+      // Data presented in form
+      const data = {
+        id: client.id,
+        npwpNomor: client.npwpNomor,
+        npwpNama: client.npwpNama,
+        npwpAlamat: client.npwpAlamat,
+        npwpKota: client.npwpKota,
+      };
+      return c.html(
+        <FormUpdate>
+          <FormContent data={data} />
+          {formScript}
+        </FormUpdate>
+      );
+    });
   }
 }

@@ -1,6 +1,3 @@
-import { LOGIN_TYPE_ACES, LOGIN_TYPE_TENANT } from "./env";
-import { Account } from "./store.types";
-
 export interface Credential {
   username: string;
   password: string;
@@ -13,13 +10,6 @@ export interface CredentialKV {
   metadata: {
     secret: string;
   };
-}
-
-// const LoginType = LOGIN_TYPE_ACES || LOGIN_TYPE_TENANT
-
-export type TenantSessionUser = Account & {
-  loginType: 'aces' | 'tenant';
-  ts: number;
 }
 
 type UpdateData = {

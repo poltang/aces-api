@@ -1,4 +1,13 @@
+import { Context } from "hono"
 import { TableProps } from "./types"
+
+export function pageNotFound(c: Context) {
+  return c.text('404 Page Not Found', 404)
+}
+
+export function objectNotFound(c: Context) {
+  return c.json({ info: 'Object Not Found'}, 404)
+}
 
 export function objectify(thing: any) {
   if (Array.isArray(thing)) {
@@ -76,7 +85,7 @@ export async function allTables(db: D1Database) {
     db.prepare("PRAGMA table_info(`modules`)"),
     db.prepare("PRAGMA table_info(`project_modules`)"),
     db.prepare("PRAGMA table_info(`accounts`)"),
-    db.prepare("PRAGMA table_info(`module_usages`)"),
+    db.prepare("PRAGMA table_info(`module_usage`)"),
   ])
 
   return [
@@ -90,6 +99,6 @@ export async function allTables(db: D1Database) {
     { title: 'modules', rows: rs[7].results as unknown as TableProps[] },
     { title: 'project_modules', rows: rs[8].results as unknown as TableProps[] },
     { title: 'accounts', rows: rs[9].results as unknown as TableProps[] },
-    { title: 'module_usages', rows: rs[10].results as unknown as TableProps[] },
+    { title: 'module_usage', rows: rs[10].results as unknown as TableProps[] },
   ];
 }

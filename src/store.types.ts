@@ -1,3 +1,29 @@
+export const TableNames = [
+  'accounts',
+  'admins',
+  'clients',
+  'members',
+  'module_groups',
+  'module_usages',
+  'modules',
+  'project_modules',
+  'projects',
+  'tenants',
+  'users',
+]
+export const Singulars = TableNames.map(n => n
+  .substring(0, n.length -1)
+  .replace('_', '')
+)
+export const Prefixes = TableNames.map(n => n
+  .substring(0, n.length -1)
+  .replace('_', '')
+  .concat(':')
+)
+export const AsPaths = TableNames.map(n => n
+  .replace('_', '-')
+)
+
 export type Admin = {
   id: string;
   username: string;
@@ -233,16 +259,16 @@ interface TypingType {
 }
 
 export const Types: TypingType = {
-  ACCOUNT:        { prefix:'account:',         asPath:'accounts',         tableName:'accounts',         typeName:'Account',        keys:AccountKeys },
-  ADMIN:          { prefix:'admin:',           asPath:'admins',           tableName:'admins',           typeName:'Admin',          keys:AdminKeys },
-  CLIENT:         { prefix:'client:',          asPath:'clients',          tableName:'clients',          typeName:'Client',         keys:ClientKeys },
-  MEMBER:         { prefix:'member:',          asPath:'members',          tableName:'members',          typeName:'Member',         keys:MemberKeys },
-  MODULEGROUP:    { prefix:'modulegroup:',     asPath:'module-groups',    tableName:'module_groups',    typeName:'ModuleGroup',    keys:ModuleGroupKeys },
-  MODULEUSAGE:    { prefix:'moduleusage:',     asPath:'module-usages',    tableName:'module_usages',    typeName:'ModuleUsage',    keys:ModuleUsageKeys },
-  MODULE:         { prefix:'module:',          asPath:'modules',          tableName:'modules',          typeName:'Module',         keys:ModuleKeys },
-  PROJECTMODULE:  { prefix:'projectmodule:',   asPath:'project-modules',  tableName:'project_modules',  typeName:'ProjectModule',  keys:ProjectModuleKeys },
-  PROJECT:        { prefix:'project:',         asPath:'projects',         tableName:'projects',         typeName:'Project',        keys:ProjectKeys },
-  TENANT:         { prefix:'tenant:',          asPath:'tenants',          tableName:'tenants',          typeName:'Tenant',         keys:TenantKeys },
-  USER:           { prefix:'user:',            asPath:'users',            tableName:'users',            typeName:'User',           keys:UserKeys },
+  /* 1  */ ACCOUNT:        { prefix:'account:',         asPath:'accounts',         tableName:'accounts',         typeName:'Account',        keys:AccountKeys },
+  /* 2  */ ADMIN:          { prefix:'admin:',           asPath:'admins',           tableName:'admins',           typeName:'Admin',          keys:AdminKeys },
+  /* 3  */ CLIENT:         { prefix:'client:',          asPath:'clients',          tableName:'clients',          typeName:'Client',         keys:ClientKeys },
+  /* 4  */ MEMBER:         { prefix:'member:',          asPath:'members',          tableName:'members',          typeName:'Member',         keys:MemberKeys },
+  /* 5  */ MODULEGROUP:    { prefix:'modulegroup:',     asPath:'module-groups',    tableName:'module_groups',    typeName:'ModuleGroup',    keys:ModuleGroupKeys },
+  /* 6  */ MODULEUSAGE:    { prefix:'moduleusage:',     asPath:'module-usages',    tableName:'module_usages',    typeName:'ModuleUsage',    keys:ModuleUsageKeys },
+  /* 7  */ MODULE:         { prefix:'module:',          asPath:'modules',          tableName:'modules',          typeName:'Module',         keys:ModuleKeys },
+  /* 8  */ PROJECTMODULE:  { prefix:'projectmodule:',   asPath:'project-modules',  tableName:'project_modules',  typeName:'ProjectModule',  keys:ProjectModuleKeys },
+  /* 9  */ PROJECT:        { prefix:'project:',         asPath:'projects',         tableName:'projects',         typeName:'Project',        keys:ProjectKeys },
+  /* 10 */ TENANT:         { prefix:'tenant:',          asPath:'tenants',          tableName:'tenants',          typeName:'Tenant',         keys:TenantKeys },
+  /* 11 */ USER:           { prefix:'user:',            asPath:'users',            tableName:'users',            typeName:'User',           keys:UserKeys },
 }
 // Types.ACCOUNT.asPath

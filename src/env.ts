@@ -1,19 +1,7 @@
-export const DBTables = [
-  "accounts",
-  "admins",
-  "clients",
-  "members",
-  "module_groups",
-  "module_usages",
-  "modules",
-  "project_modules",
-  "projects",
-  "tenants",
-  "users",
-];
-
 export const LOGIN_TYPE_ACES = 'aces'
 export const LOGIN_TYPE_TENANT = 'tenant'
+export const ADMIN_KV_PREFIX = "acesadmin:";
+export const CRED_KV_PREFIX = "cred:";
 
 export interface Env {
   COOKIE_NAME: string;

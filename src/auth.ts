@@ -1,41 +1,31 @@
 import { sealData } from "iron-session/edge"
 import { decrypt } from "./crypto"
 import { Account } from "./store.types"
-import { TenantSessionUser } from "./types"
+import { AcesSessionUser, TenantSessionUser } from "./session"
+import { objectNotFound } from "./utils"
+import { ADMIN_KV_PREFIX, CRED_KV_PREFIX, LOGIN_TYPE_TENANT } from "./env"
+import { Credential } from "./types"
 
 export async function authHandler(c) {
-  const {username, password} = await c.req.json() as unknown as any
+  const { type, username, password } = (await c.req.json()) as unknown as Credential;
 
-  // 1. Find only default account
-  // TODO: case if no row with isDefault=TRUE
-  const sql = `SELECT * FROM accounts WHERE status='active' AND isDefault=TRUE AND (email=? OR username=?)`
-  const found: Account = await c.env.DB.prepare(sql).bind(username, username).first()
-  if (!found) {
-    return c.json({ message: 'Not Found'}, 404)
-  }
-  console.log('RS', found)
+  const stmt = type == LOGIN_TYPE_TENANT
+    ? `SELECT * FROM accounts WHERE status='active'
+    AND isDefault=TRUE AND (email=? OR username=?)`
+    : `SELECT * FROM admins
+    WHERE status='active' AND (email=? OR username=?)`
 
-  // 2. Check tenant's expiryDate
-  // const exp = new Date(found.expiryDate).getTime()
-  // const now = new Date().getTime()
-  // const hours = (exp - now) / 3600000
-  // if (hours < 1) {
-  //   return c.json({ message: 'Could not log you in: Tenant expires in less then one hour'}, 401)
-  // }
+  const found = await c.env.DB.prepare(stmt)
+    .bind(username, username).first()
 
-  // 3. Verify credential in KV
-  /*
-    key: cred:<id>
-    value: secret
-    metadata: {
-      id: ids[i],
-      secret: secret,
-      created: new Date().toISOString(),
-    }
-  */
-  const key = `cred:${found.id}`
-  console.log('key', key);
+  if (!found) return objectNotFound(c)
+
+  const key = type == LOGIN_TYPE_TENANT
+    ? `${CRED_KV_PREFIX}:${found.id}`
+    : `${ADMIN_KV_PREFIX}${found.id}`
+
   const data = await c.env.KV.getWithMetadata(key) //as unknown as CredentialKV
+  console.log('key', key);
   console.log('data', data);
 
   if (!data) {
@@ -44,39 +34,41 @@ export async function authHandler(c) {
     return c.json({ message: 'Could not log you in: Password not created'}, 401)
   }
 
-  // const secret = cred.metadata.secret
-  // const decoded = await decrypt(secret)
   if (password != await decrypt(data.metadata.secret)) {
     return c.json({ message: 'Error username or password'}, 401)
   }
 
-  // 4. Verified...
-  // https://stackoverflow.com/questions/23886484/elegant-way-to-code-partially-copy-objects-in-javascript#50965203
-  // const { orgName, expiryDate, ...rest } = found
-  // const partial = rest
-  const user: TenantSessionUser = { // SessionUser
-    // TODO
-    // Check accuracy of `isDefault`
+  const user = type == LOGIN_TYPE_TENANT
+  ? {
     ...found,
     isDefault: true,
     loginType: 'tenant',
     ts: new Date().getTime(),
-  }
-  console.log('TenantSessionUser', user);
+  } as TenantSessionUser
+  : {
+    id: found.id,
+    loginType: "aces",
+    fullname: found.fullname,
+    username: found.username,
+    email: found.email,
+    role: found.role,
+    status: found.status,
+    ts: new Date().getTime(),
+  } as AcesSessionUser
 
-  const sealedData = await sealData(user, {password: c.env.COOKIE_PASSWORD})
+  console.log("AcesSessionUser:", user);
+  const sealedData = await sealData(user, {password: c.env.COOKIE_PASSWORD});
   console.log("sealedData:", sealedData);
-
 
   /* Create headers and set cookie for direct client
   ================================================== */
-  c.header('X-Message', 'Hello!')
-  c.header('Content-Type', 'application/json')
-  // c.cookie(c.env.COOKIE_NAME, createCookie(sealedData))
-  c.cookie(c.env.COOKIE_NAME, sealedData)
-  c.status(200)
+  c.header("X-Message", "Hello!");
+  c.header("Content-Type", "application/json");
+  c.cookie(c.env.COOKIE_NAME, sealedData);
+  c.status(200);
 
   /* Return user and cookie data that can be reused by client
   =========================================================== */
-  return c.json({ user, cookie: sealedData })
+  return c.json({ user, cookie: sealedData });
 }
+
