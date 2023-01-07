@@ -2,7 +2,13 @@
 import { Hono } from "hono";
 import { serveStatic } from "hono/serve-static.module";
 import { Env, LOGIN_TYPE_TENANT } from "./env";
-import { fetchAcesDurable, getLoginType, logPath, unauthorized } from "./utils";
+import {
+  fetchAcesDurable,
+  getLoginType,
+  logPath,
+  pageNotFound,
+  unauthorized,
+} from "./utils";
 import signinHTML from "./signin-html";
 import { authHandler } from "./auth";
 import { Credential } from "./types";
@@ -17,30 +23,84 @@ import {
   tableWithId,
   whoami,
 } from "./dev-routes";
-import { AsPaths, Prefixes, Singulars, TableNames } from "./store.types";
+import { Prefixes, Singulars, TableNames, TablePaths } from "./store.types";
 import { getSessionUser } from "./session";
+import { sampleData } from "./data";
 
 /* exports */
 export { AcesDurables } from "./AcesDurables";
 
-const app = new Hono<{ Bindings: Env }>({ strict: true });
+const app = new Hono<{ Bindings: Env }>({ strict: false });
 
 // app.use('*', poweredBy())
 // Middleware poweredBy() caused error when directly returning
 // from DurableObject
 // TODO: Should create issue on honojs
 
+app.use("/static/*", serveStatic({ root: "./" }));
+
 app.use("*", async (c, next) => {
   logPath(c, "Hono");
   await next();
 });
-app.use("/static/*", serveStatic({ root: "./" }));
+
+const apiPaths = [
+  ...TablePaths, // Durable
+  "test", // <- all testing goes here
+  "keys", // Durable
+  "data",
+  "pragma",
+  "tenant", // Durable
+];
+
+app.use("/:query/:path?", async (c, next) => {
+  console.log("middleware");
+  const query = c.req.param("query");
+  const login = await getLoginType(c, c.env);
+
+  // Apply protected
+  if (apiPaths.includes(query) && !login) {
+    return unauthorized(c);
+  }
+  if (TablePaths.includes(query) && query != "modules") {
+    if (login == LOGIN_TYPE_TENANT) return unauthorized(c);
+  }
+  if (query == "tenant" && login != LOGIN_TYPE_TENANT) {
+    return unauthorized(c);
+  }
+  await next();
+});
+
+app.use("/:query/:path/:subpath?", async (c, next) => {
+  console.log("middleware");
+  const query = c.req.param("query");
+  const login = await getLoginType(c, c.env);
+
+  // Apply protected
+  if (apiPaths.includes(query) && !login) {
+    return unauthorized(c);
+  }
+  if (TablePaths.includes(query) && query != "modules") {
+    if (login == LOGIN_TYPE_TENANT) return unauthorized(c);
+  }
+  if (query == "tenant" && login != LOGIN_TYPE_TENANT) {
+    return unauthorized(c);
+  }
+  await next();
+});
+
+// ----------------------
+
 app.use("/favicon.ico", serveStatic({ path: "./favicon.ico" }));
 app.use("/login", serveStatic({ path: "./login.html" }));
-app.get("/z", (c) => c.text("This is Home! You can access: /static/hello.txt"));
+
+app.get("/hello", (c) =>
+  c.text("This is Home! You can access: /static/hello.txt")
+);
 app.get("/", async (c) => {
-  return c.json({ TableNames, AsPaths, Prefixes, Singulars });
+  return c.json({ TableNames, TablePaths, Prefixes, Singulars });
 });
+
 /* Signin */
 
 app.get("/signin", async (c) => c.html(signinHTML));
@@ -55,40 +115,38 @@ app.post("/signin", async (c) => {
 /* DEV Routes */
 
 app.get("/whoami", async (c) => whoami(c));
-app.get("/admin-kv", async (c) => adminKV(c));
-app.get("/delete-kv", async (c) => deleteSeedKV(c));
-app.get("/rebuild-kv", async (c) => rebuildSeedKV(c));
-app.get("/tables", async (c) => showTables(c));
-app.get("/mini", async (c) => mini(c));
+app.get("/sample-data", async (c) => sampleData(c));
+app.get("/test/admin-kv", async (c) => adminKV(c));
+app.get("/test/delete-kv", async (c) => deleteSeedKV(c));
+app.get("/test/rebuild-kv", async (c) => rebuildSeedKV(c));
+app.get("/test/tables", async (c) => showTables(c));
+app.get("/test/mini", async (c) => mini(c));
 app.get("/pragma/:table", async (c) => pragma(c));
 app.get("/data/:table", async (c) => table(c));
 app.get("/data/:table/:id", async (c) => tableWithId(c));
 
-/* Middleware: aces or tenant */
-app.use("/api/:tenantOrAces/*", async (c, next) => {
-  const path = c.req.param("tenantOrAces");
-  const loginType = await getLoginType(c);
-  if (path == LOGIN_TYPE_TENANT && loginType != LOGIN_TYPE_TENANT) {
-    return unauthorized(c);
+app.get("/:query/:path?", async (c) => {
+  const query = c.req.param("query");
+  console.log("query", query);
+  if (!apiPaths.includes(query)) {
+    return pageNotFound(c);
   }
-  if (path != LOGIN_TYPE_TENANT && loginType == LOGIN_TYPE_TENANT) {
-    return unauthorized(c);
-  }
-  await next();
+  return fetchAcesDurable(c);
 });
 
-/* Middleware: aces & tenat */
-app.use("/jsx", async (c, next) => {
-  const user = await getSessionUser(c.req, c.env);
-  if (!user) return unauthorized(c);
-  await next();
+// { strict: true }
+app.get("/:query/:path/*", async (c) => {
+  const query = c.req.param("query");
+  console.log("query", query);
+  if (!apiPaths.includes(query)) {
+    return pageNotFound(c);
+  }
+  return fetchAcesDurable(c);
 });
 
 // TES FORM UPDATE
-app.get("/jsx", async (c) => fetchAcesDurable(c));
-// app.post("/jsx", async (c) => fetchAcesDurable(c));
-
-app.get("/api/*", async (c) => fetchAcesDurable(c));
-app.post("/api/*", async (c) => fetchAcesDurable(c));
+// app.get("/dev/*", async (c) => fetchAcesDurable(c));
+// app.get("/api/*", async (c) => fetchAcesDurable(c));
+// app.post("/api/*", async (c) => fetchAcesDurable(c));
 
 export default app;

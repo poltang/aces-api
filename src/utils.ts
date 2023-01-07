@@ -1,5 +1,5 @@
 import { Context } from "hono"
-import { ACES_DO_NAME } from "./env";
+import { ACES_DO_NAME, Env } from "./env";
 import { getSessionUser } from "./session";
 import { TableProps } from "./types"
 
@@ -21,8 +21,8 @@ export const fetchAcesDurable = async (c) => {
   return await stub.fetch(c.req);
 };
 
-export const getLoginType = async (c) => {
-  const user: any = await getSessionUser(c.req, c.env);
+export const getLoginType = async (c: Context, env: Env) => {
+  const user: any = await getSessionUser(c.req, env);
   return user && user.loginType ? user.loginType : null;
 };
 

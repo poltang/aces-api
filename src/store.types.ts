@@ -1,4 +1,17 @@
-export const TableNames = [
+export type TableName =
+  | 'accounts'
+  | 'admins'
+  | 'clients'
+  | 'members'
+  | 'module_groups'
+  | 'module_usages'
+  | 'modules'
+  | 'project_modules'
+  | 'projects'
+  | 'tenants'
+  | 'users'
+
+export const TableNames: TableName[] = [
   'accounts',
   'admins',
   'clients',
@@ -20,7 +33,7 @@ export const Prefixes = TableNames.map(n => n
   .replace('_', '')
   .concat(':')
 )
-export const AsPaths = TableNames.map(n => n
+export const TablePaths = TableNames.map(n => n
   .replace('_', '-')
 )
 
@@ -237,38 +250,45 @@ export const ProjectKeys = (`id,tenantId,clientId,adminId,slug,created,updated,`
 
 export const ProjectModuleKeys =(`id,projectId,quota,created,updated`).split(',')
 
-type Typing = {
-  prefix: string;
-  asPath: string;
-  tableName: string;
-  typeName: string;
-  keys: string[] | null;
-}
-interface TypingType {
-  MODULE: Typing;
-  MODULEGROUP: Typing;
-  MODULEUSAGE: Typing;
-  PROJECTMODULE: Typing;
-  ADMIN: Typing;
-  USER: Typing;
-  MEMBER: Typing;
-  ACCOUNT: Typing;
-  CLIENT: Typing;
-  TENANT: Typing;
-  PROJECT: Typing;
+export type DurableType =
+  | "account"
+  | "admin"
+  | "client"
+  | "member"
+  | "modulegroup"
+  | "moduleusage"
+  | "module"
+  | "projectmodule"
+  | "project"
+  | "tenant"
+  | "user";
+
+// export type DurablePrefix = {
+//   [K in DurableType]: string;
+// };
+
+export function getDurableType(tableName: TableName) {
+  return tableName.substring(0, tableName.length -1)
+  .replace('_', '') as DurableType
 }
 
-export const Types: TypingType = {
-  /* 1  */ ACCOUNT:        { prefix:'account:',         asPath:'accounts',         tableName:'accounts',         typeName:'Account',        keys:AccountKeys },
-  /* 2  */ ADMIN:          { prefix:'admin:',           asPath:'admins',           tableName:'admins',           typeName:'Admin',          keys:AdminKeys },
-  /* 3  */ CLIENT:         { prefix:'client:',          asPath:'clients',          tableName:'clients',          typeName:'Client',         keys:ClientKeys },
-  /* 4  */ MEMBER:         { prefix:'member:',          asPath:'members',          tableName:'members',          typeName:'Member',         keys:MemberKeys },
-  /* 5  */ MODULEGROUP:    { prefix:'modulegroup:',     asPath:'module-groups',    tableName:'module_groups',    typeName:'ModuleGroup',    keys:ModuleGroupKeys },
-  /* 6  */ MODULEUSAGE:    { prefix:'moduleusage:',     asPath:'module-usages',    tableName:'module_usages',    typeName:'ModuleUsage',    keys:ModuleUsageKeys },
-  /* 7  */ MODULE:         { prefix:'module:',          asPath:'modules',          tableName:'modules',          typeName:'Module',         keys:ModuleKeys },
-  /* 8  */ PROJECTMODULE:  { prefix:'projectmodule:',   asPath:'project-modules',  tableName:'project_modules',  typeName:'ProjectModule',  keys:ProjectModuleKeys },
-  /* 9  */ PROJECT:        { prefix:'project:',         asPath:'projects',         tableName:'projects',         typeName:'Project',        keys:ProjectKeys },
-  /* 10 */ TENANT:         { prefix:'tenant:',          asPath:'tenants',          tableName:'tenants',          typeName:'Tenant',         keys:TenantKeys },
-  /* 11 */ USER:           { prefix:'user:',            asPath:'users',            tableName:'users',            typeName:'User',           keys:UserKeys },
-}
-// Types.ACCOUNT.asPath
+export const DurableTypes = {}
+
+export type PrefixType = {
+  [K in DurableType]: string;
+};
+
+export const PREFIX: PrefixType = {
+  // Key is singular mode of table name sans underscore
+  account: Prefixes[0],
+  admin: Prefixes[1],
+  client: Prefixes[2],
+  member: Prefixes[3],
+  modulegroup: Prefixes[4],
+  moduleusage: Prefixes[5],
+  module: Prefixes[6],
+  projectmodule: Prefixes[7],
+  project: Prefixes[8],
+  tenant: Prefixes[9],
+  user: Prefixes[10],
+};
