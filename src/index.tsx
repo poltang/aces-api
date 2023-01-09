@@ -51,6 +51,10 @@ const apiPaths = [
   "data",
   "pragma",
   "tenant", // Durable
+  "do-seed",
+  "do-weep",
+  "delete-db",
+  "backup-to-db",
 ];
 
 app.use("/:query/:path?", async (c, next) => {

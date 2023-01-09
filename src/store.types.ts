@@ -12,17 +12,25 @@ export type TableName =
   | 'users'
 
 export const TableNames: TableName[] = [
-  'accounts',
+  /*
+  !!! DO NOT CHANGE THE ORDER
+  !!! It is used to dump DO storage to SQL
+  */
   'admins',
-  'clients',
+  'users',
+  'tenants',
   'members',
+  'clients',
+  'projects',
   'module_groups',
-  'module_usages',
   'modules',
   'project_modules',
-  'projects',
-  'tenants',
-  'users',
+  'accounts',
+  'module_usages',
+]
+export const ViewNames: TableName[] = [
+  'accounts',
+  'module_usages',
 ]
 export const Singulars = TableNames.map(n => n
   .substring(0, n.length -1)
@@ -212,6 +220,8 @@ export type ModuleUsage = {
   updated: string;
 }
 
+export type Backupable = Admin | User | Tenant | Member | Client | Project | ModuleGroup | Module | ProjectModule;
+
 export const ModuleKeys = (`id,groupId,lang,level,minutes,method,title,description,`
 + `price,created,updated`).split(',')
 
@@ -280,15 +290,34 @@ export type PrefixType = {
 
 export const PREFIX: PrefixType = {
   // Key is singular mode of table name sans underscore
-  account: Prefixes[0],
-  admin: Prefixes[1],
-  client: Prefixes[2],
+  /*
+  !!! DO NOT CHANGE THE ORDER
+  !!! It is used to dump DO storage to SQL
+  */
+  admin: Prefixes[0],
+  user: Prefixes[1],
+  tenant: Prefixes[2],
   member: Prefixes[3],
-  modulegroup: Prefixes[4],
-  moduleusage: Prefixes[5],
-  module: Prefixes[6],
-  projectmodule: Prefixes[7],
-  project: Prefixes[8],
-  tenant: Prefixes[9],
-  user: Prefixes[10],
+  client: Prefixes[4],
+  project: Prefixes[5],
+  modulegroup: Prefixes[6],
+  module: Prefixes[7],
+  projectmodule: Prefixes[8],
+  account: Prefixes[9],
+  moduleusage: Prefixes[10],
 };
+
+// account: Prefixes[0],
+// moduleusage: Prefixes[5],
+export const COLUMNS = {
+  admin: "id,fullname,username,email,role,status,secret,created,updated".split(','),
+  client: "id,tenantId,created,updated,orgName,address1,address2,city,province,postcode,phone,email,website,orgType,bizTypes,logo,npwpNomor,npwpNama,npwpNIK,npwpAlamat,npwpKelurahan,npwpKecamatan,npwpKota,npwpProvinsi,contactName,contactPhone,contactEmail".split(','),
+  member: "id,tenantId,role,status,created,updated,isDefault".split(','),
+  // member: "id,tenantId,role,status,isDefault,created,updated".split(','),
+  modulegroup: "id,name,descID,descEN,created,updated".split(','),
+  module: "id,groupId,lang,level,minutes,method,title,description,price,created,updated".split(','),
+  projectmodule: "id,projectId,quota,created,updated".split(','),
+  project: "id,tenantId,clientId,adminId,slug,created,updated,type,title,description,startDate,endDate,acesContractDate,acesContractValue,acesInvoiceDate,reportLang,clientContractDate,clientInvoiceDate,contactName,contactPhone,contactEmail".split(','),
+  tenant: "id,adminId,created,updated,expiryDate,orgName,shortName,tenantType,licenseType,refreshDate,address1,address2,city,province,postcode,phone,email,website,orgType,bizTypes,logo,npwpNomor,npwpNama,npwpNIK,npwpAlamat,npwpKelurahan,npwpKecamatan,npwpKota,npwpProvinsi,contactName,contactPhone,contactEmail,techContactName,techContactPhone,techContactEmail".split(','),
+  user: "id,created,updated,username,fullname,email".split(','),
+}
