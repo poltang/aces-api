@@ -1,28 +1,19 @@
-VIEWS
-    accounts;
-    active_accounts;
-    used_modules;
-TABLES
-    admins
-    users;
-    members;
-    tenants;
-    clients;
-    projects;
-    modules;
-    module_groups;
-    project_modules;
-
-NUMERICS
-mcount
-acesContractValue
-level
-minutes
-price
-quota
-
-ARRAYS
-bizTypes
-
-BOOLEAN
-isDefault
+LIST OF USED SYMBOLS
+--------------------
+AcesDurables
+------------
+singular
+getDurableKey
+TenantDataGroup
+KEYS
+initStoreWithSampleData
+dumpStorage
+getSessionUser
+TenantSessionUser
+tenantQueries
+pageNotFound
+PREFIX
+getDurableType
+objectNotFound
+TableName
+------------

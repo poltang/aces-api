@@ -49,6 +49,7 @@ const apiPaths = [
   "test", // <- all testing goes here
   "keys", // Durable
   "data",
+  "dump",
   "pragma",
   "tenant", // Durable
   "do-seed",
